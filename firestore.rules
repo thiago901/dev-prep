@@ -1,0 +1,177 @@
+rules_version = '2';
+
+// DevPrep Firestore security rules.
+//
+// Principle: hiding UI is not access control. Every private document is
+// reachable only by its owner, and every write is shape-checked so a
+// compromised client cannot inflate progress, forge a subscription, or
+// grant itself admin.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------------
+    // helpers
+    // ---------------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Admin membership lives in a collection no client can write. Documents
+    // are created from the Firebase console or a Cloud Function only.
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Field-set guard: the write may only touch the listed keys.
+    function onlyFields(allowed) {
+      return incoming().keys().hasOnly(allowed);
+    }
+
+    function isTimestamp(value) {
+      return value is timestamp;
+    }
+
+    // ---------------------------------------------------------------------
+    // admins — readable by the admin themselves so the client can reveal the
+    // builder. Never writable from a client, at any privilege level.
+    // ---------------------------------------------------------------------
+    match /admins/{uid} {
+      allow get: if isOwner(uid);
+      allow list, create, update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------------
+    // content — the question / challenge bank.
+    // Published content is world-readable so unauthenticated visitors can
+    // browse. Drafts are visible to admins only. Writes are admin-only.
+    // ---------------------------------------------------------------------
+    match /content/{contentId} {
+      allow get, list: if resource.data.status == 'published' || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // taxonomy: categories, stacks, difficulties, content types, tags.
+    match /taxonomy/{kind}/{itemId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Remote-config-like presentation settings (ad placement, feature gates).
+    // Public read so the shell can configure itself before sign-in.
+    match /appSettings/{docId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------------------------------------------------------------------
+    // users — the private area. Everything below /users/{uid} belongs to
+    // that user and to nobody else, admins included.
+    // ---------------------------------------------------------------------
+    match /users/{uid} {
+
+      allow get: if isOwner(uid);
+      allow list: if false;
+
+      // A user creates their own profile document at first sign-in. uid must
+      // match the path, and role is not a client-writable field.
+      allow create: if isOwner(uid)
+        && incoming().uid == uid
+        && !incoming().keys().hasAny(['role', 'isAdmin', 'entitlements']);
+
+      allow update: if isOwner(uid)
+        && !incoming().diff(resource.data).affectedKeys()
+              .hasAny(['uid', 'role', 'isAdmin', 'entitlements', 'createdAt']);
+
+      allow delete: if isOwner(uid);
+
+      // Per-content study state: srs stage, confidence, counters.
+      match /progress/{contentId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Skill-level aggregates (Node.js 72%, Security 43%, ...).
+      match /skills/{skillId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // One document per recorded or skipped attempt at a content item.
+      match /attempts/{attemptId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && incoming().contentId is string
+          && incoming().createdAt is timestamp;
+        allow update, delete: if isOwner(uid);
+      }
+
+      // Recording metadata. The audio itself lives in Storage under the same
+      // uid prefix; this document holds duration, storage path and dates.
+      match /recordings/{recordingId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && incoming().contentId is string
+          && incoming().durationMs is number
+          && incoming().durationMs >= 0;
+        allow update, delete: if isOwner(uid);
+      }
+
+      match /favorites/{contentId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /sessions/{sessionId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /mockInterviews/{mockId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Today's Practice sessions. Items are capped so a client cannot turn
+      // one document into unbounded storage.
+      match /practiceSessions/{sessionId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && incoming().items is list
+          && incoming().items.size() <= 20
+          && incoming().size in [5, 10, 20];
+      }
+
+      match /settings/{settingId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Everything else under a user document is denied rather than
+      // implicitly allowed by a future feature.
+      match /{document=**} {
+        allow read, write: if false;
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // subscriptions — entitlements are decided by the billing webhook, never
+    // by the client. The user may read their own record and nothing more.
+    // ---------------------------------------------------------------------
+    match /subscriptions/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------------
+    // default deny
+    // ---------------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

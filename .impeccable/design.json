@@ -1,0 +1,720 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-16T21:45:08.305Z",
+  "title": "Design System: DevPrep",
+  "extensions": {
+    "colorMeta": {
+      "booth": {
+        "role": "neutral",
+        "displayName": "Booth",
+        "canonical": "rgb(var(--lab-booth))",
+        "tonalRamp": [
+          "#30251C",
+          "#534031",
+          "#775B46",
+          "#9A765B",
+          "#B2937B",
+          "#C6B09F",
+          "#DDCFC5",
+          "#F6F2EF"
+        ]
+      },
+      "felt": {
+        "role": "neutral",
+        "displayName": "Felt",
+        "canonical": "rgb(var(--lab-felt))",
+        "tonalRamp": [
+          "#30251D",
+          "#524132",
+          "#755C47",
+          "#98775D",
+          "#B0947D",
+          "#C5B0A0",
+          "#DCD0C6",
+          "#F5F2EF"
+        ]
+      },
+      "chassis": {
+        "role": "neutral",
+        "displayName": "Chassis",
+        "canonical": "rgb(var(--lab-chassis))",
+        "tonalRamp": [
+          "#2F261E",
+          "#514134",
+          "#735D4A",
+          "#957860",
+          "#AD9480",
+          "#C3B1A2",
+          "#DBD0C7",
+          "#F5F2F0"
+        ]
+      },
+      "plate": {
+        "role": "neutral",
+        "displayName": "Plate",
+        "canonical": "rgb(var(--lab-plate))",
+        "tonalRamp": [
+          "#2D261F",
+          "#4F4136",
+          "#705D4D",
+          "#917963",
+          "#AA9583",
+          "#C1B1A4",
+          "#DAD0C8",
+          "#F5F2F0"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "rgb(var(--lab-rule))",
+        "tonalRamp": [
+          "#2C2620",
+          "#4D4238",
+          "#6E5D4F",
+          "#8E7967",
+          "#A79586",
+          "#BFB2A6",
+          "#D9D1CA",
+          "#F4F2F0"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Rule Strong",
+        "canonical": "rgb(var(--lab-rule-strong))",
+        "tonalRamp": [
+          "#2B2621",
+          "#4B4239",
+          "#6B5E52",
+          "#8B796A",
+          "#A49688",
+          "#BDB2A8",
+          "#D7D1CB",
+          "#F4F2F1"
+        ]
+      },
+      "legend": {
+        "role": "neutral",
+        "displayName": "Legend Bone",
+        "canonical": "rgb(var(--lab-legend))",
+        "tonalRamp": [
+          "#322A1B",
+          "#56492F",
+          "#7A6843",
+          "#9E8656",
+          "#B5A178",
+          "#C9BA9C",
+          "#DFD6C4",
+          "#F6F3EE"
+        ]
+      },
+      "legend-2": {
+        "role": "neutral",
+        "displayName": "Legend 2",
+        "canonical": "rgb(var(--lab-legend-2))",
+        "tonalRamp": [
+          "#2B2722",
+          "#4A443B",
+          "#696154",
+          "#887E6D",
+          "#A29A8B",
+          "#BBB5AA",
+          "#D6D2CC",
+          "#F4F3F1"
+        ]
+      },
+      "legend-3": {
+        "role": "neutral",
+        "displayName": "Legend 3",
+        "canonical": "rgb(var(--lab-legend-3))",
+        "tonalRamp": [
+          "#292724",
+          "#47433E",
+          "#646058",
+          "#827C73",
+          "#9D9890",
+          "#B7B4AE",
+          "#D4D2CE",
+          "#F3F2F1"
+        ]
+      },
+      "brass": {
+        "role": "secondary",
+        "displayName": "VU Brass",
+        "canonical": "rgb(var(--lab-brass))",
+        "tonalRamp": [
+          "#3C2B11",
+          "#684A1D",
+          "#946929",
+          "#BF8835",
+          "#D1A25B",
+          "#DEBB87",
+          "#EBD6B7",
+          "#F9F4EB"
+        ]
+      },
+      "monitor": {
+        "role": "tertiary",
+        "displayName": "Monitor Sage",
+        "canonical": "rgb(var(--lab-green))",
+        "tonalRamp": [
+          "#1E2F24",
+          "#34513E",
+          "#4A7358",
+          "#609573",
+          "#80AD90",
+          "#A2C3AE",
+          "#C7DBCE",
+          "#EFF5F1"
+        ]
+      },
+      "record": {
+        "role": "primary",
+        "displayName": "Record Red",
+        "canonical": "rgb(var(--lab-red))",
+        "tonalRamp": [
+          "#3D130F",
+          "#6A211B",
+          "#972F26",
+          "#C43D31",
+          "#D56258",
+          "#E08C85",
+          "#EDBAB6",
+          "#FAECEB"
+        ]
+      },
+      "record-ink": {
+        "role": "primary",
+        "displayName": "Record Ink",
+        "canonical": "rgb(var(--lab-red-ink))",
+        "tonalRamp": [
+          "#3D140F",
+          "#6A231B",
+          "#973226",
+          "#C44131",
+          "#D56658",
+          "#E08F85",
+          "#EDBCB6",
+          "#FAECEB"
+        ]
+      },
+      "channel2": {
+        "role": "tertiary",
+        "displayName": "Channel Two Blue-Grey",
+        "canonical": "rgb(var(--lab-cool))",
+        "tonalRamp": [
+          "#20272C",
+          "#38434D",
+          "#4F5F6D",
+          "#677C8E",
+          "#8697A7",
+          "#A6B3BF",
+          "#CAD2D8",
+          "#F0F2F4"
+        ]
+      },
+      "booth-light": {
+        "role": "neutral",
+        "displayName": "Booth (light theme)",
+        "canonical": "rgb(var(--lab-booth))",
+        "tonalRamp": [
+          "#30291D",
+          "#534832",
+          "#766647",
+          "#98845C",
+          "#B09F7D",
+          "#C5B9A0",
+          "#DCD5C6",
+          "#F5F3EF"
+        ]
+      },
+      "felt-light": {
+        "role": "neutral",
+        "displayName": "Felt (light theme)",
+        "canonical": "rgb(var(--lab-felt))",
+        "tonalRamp": [
+          "#2E291E",
+          "#514734",
+          "#73654A",
+          "#958360",
+          "#AD9E80",
+          "#C3B8A2",
+          "#DBD4C7",
+          "#F5F3F0"
+        ]
+      },
+      "chassis-light": {
+        "role": "neutral",
+        "displayName": "Chassis (light theme)",
+        "canonical": "rgb(var(--lab-chassis))",
+        "tonalRamp": [
+          "#322B1A",
+          "#574B2E",
+          "#7C6A41",
+          "#A18A54",
+          "#B7A476",
+          "#CABC9B",
+          "#DFD7C3",
+          "#F6F4EE"
+        ]
+      },
+      "plate-light": {
+        "role": "neutral",
+        "displayName": "Plate (light theme)",
+        "canonical": "rgb(var(--lab-plate))",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5E5E5E",
+          "#7A7A7A",
+          "#969696",
+          "#B3B3B3",
+          "#D1D1D1",
+          "#F2F2F2"
+        ]
+      },
+      "rule-light": {
+        "role": "neutral",
+        "displayName": "Rule (light theme)",
+        "canonical": "rgb(var(--lab-rule))",
+        "tonalRamp": [
+          "#2D291F",
+          "#4F4736",
+          "#70654D",
+          "#918364",
+          "#AA9E83",
+          "#C1B8A4",
+          "#DAD4C9",
+          "#F5F3F0"
+        ]
+      },
+      "rule-strong-light": {
+        "role": "neutral",
+        "displayName": "Rule Strong (light theme)",
+        "canonical": "rgb(var(--lab-rule-strong))",
+        "tonalRamp": [
+          "#2C2821",
+          "#4C4639",
+          "#6C6351",
+          "#8C8169",
+          "#A59C88",
+          "#BDB6A8",
+          "#D8D3CB",
+          "#F4F3F0"
+        ]
+      },
+      "legend-light": {
+        "role": "neutral",
+        "displayName": "Legend Bone (light theme)",
+        "canonical": "rgb(var(--lab-legend))",
+        "tonalRamp": [
+          "#2E2A1E",
+          "#504934",
+          "#72684A",
+          "#948761",
+          "#ACA180",
+          "#C3BBA2",
+          "#DBD6C7",
+          "#F5F4F0"
+        ]
+      },
+      "legend-2-light": {
+        "role": "neutral",
+        "displayName": "Legend 2 (light theme)",
+        "canonical": "rgb(var(--lab-legend-2))",
+        "tonalRamp": [
+          "#2B2822",
+          "#4A453B",
+          "#696254",
+          "#887F6D",
+          "#A29A8B",
+          "#BBB5AA",
+          "#D6D3CC",
+          "#F4F3F1"
+        ]
+      },
+      "legend-3-light": {
+        "role": "neutral",
+        "displayName": "Legend 3 (light theme)",
+        "canonical": "rgb(var(--lab-legend-3))",
+        "tonalRamp": [
+          "#2A2723",
+          "#48443D",
+          "#666156",
+          "#857E70",
+          "#9F998D",
+          "#B9B4AC",
+          "#D5D2CD",
+          "#F3F3F1"
+        ]
+      },
+      "brass-light": {
+        "role": "secondary",
+        "displayName": "VU Brass (light theme)",
+        "canonical": "rgb(var(--lab-brass))",
+        "tonalRamp": [
+          "#3D2B0F",
+          "#6A4B1B",
+          "#976B26",
+          "#C48A31",
+          "#D5A458",
+          "#E0BC85",
+          "#EDD7B6",
+          "#FAF4EB"
+        ]
+      },
+      "monitor-light": {
+        "role": "tertiary",
+        "displayName": "Monitor Sage (light theme)",
+        "canonical": "rgb(var(--lab-green))",
+        "tonalRamp": [
+          "#173523",
+          "#285C3D",
+          "#398357",
+          "#4AAB71",
+          "#6DC08F",
+          "#94D1AD",
+          "#BFE3CE",
+          "#EDF7F1"
+        ]
+      },
+      "record-light": {
+        "role": "primary",
+        "displayName": "Record Red (light theme)",
+        "canonical": "rgb(var(--lab-red))",
+        "tonalRamp": [
+          "#3D130F",
+          "#6A211B",
+          "#973026",
+          "#C43E31",
+          "#D56358",
+          "#E08D85",
+          "#EDBAB6",
+          "#FAECEB"
+        ]
+      },
+      "record-ink-light": {
+        "role": "primary",
+        "displayName": "Record Ink (light theme)",
+        "canonical": "rgb(var(--lab-red-ink))",
+        "tonalRamp": [
+          "#3D140F",
+          "#6A221B",
+          "#973026",
+          "#C43F31",
+          "#D56358",
+          "#E08D85",
+          "#EDBBB6",
+          "#FAECEB"
+        ]
+      },
+      "channel2-light": {
+        "role": "tertiary",
+        "displayName": "Channel Two Blue-Grey (light theme)",
+        "canonical": "rgb(var(--lab-cool))",
+        "tonalRamp": [
+          "#1D262F",
+          "#334352",
+          "#485F75",
+          "#5E7B97",
+          "#7E97AF",
+          "#A0B3C5",
+          "#C6D1DC",
+          "#EFF2F5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "deck": {
+        "displayName": "Deck",
+        "purpose": "Page and content titles."
+      },
+      "prompt-lg": {
+        "displayName": "Prompt Large",
+        "purpose": "Loaded deck question from the sm breakpoint up."
+      },
+      "prompt": {
+        "displayName": "Prompt",
+        "purpose": "Deck and drill questions on small screens."
+      },
+      "body-lg": {
+        "displayName": "Body Large",
+        "purpose": "Empty/error state titles and the wordmark."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text and row titles, 68ch measure."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Greeting/streak line, row descriptions, small readouts."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Footnotes such as the reveal-without-trying escape."
+      },
+      "legend": {
+        "displayName": "Silkscreen Legend",
+        "purpose": "Panel headings, lamp labels, tags, switch positions. Uppercase at 118% width."
+      },
+      "mono": {
+        "displayName": "Mono Readout",
+        "purpose": "Code, counters, timecode and percentages, with tabular figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "faceplate",
+        "value": "0 1px 0 rgb(var(--lab-highlight) / 0.05) inset, 0 1px 2px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.6)), 0 10px 28px -18px rgb(0 0 0 / var(--lab-shadow-strength))",
+        "purpose": "Every panel; strength is 0.55 dark and 0.16 light."
+      },
+      {
+        "name": "recess",
+        "value": "0 2px 5px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.5)) inset",
+        "purpose": "Wells, meters and the two-position switch."
+      },
+      {
+        "name": "raised",
+        "value": "0 1px 0 rgb(var(--lab-highlight) / 0.06) inset, 0 2px 6px rgb(0 0 0 / 0.4)",
+        "purpose": "Record, primary and neutral keys at rest."
+      },
+      {
+        "name": "pressed",
+        "value": "0 1px 3px rgb(0 0 0 / 0.5) inset",
+        "purpose": "Keys while pressed, active switch position and active rail item."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-engage",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Key travel and switch engagement at 150ms."
+      },
+      {
+        "name": "lamp-roll",
+        "value": "lamp-roll 1.6s ease-in-out infinite",
+        "purpose": "Only while a take is rolling, and the booth loader bars."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration and transition-duration 0.01ms",
+        "purpose": "Lamps become static and transports engage instantly."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Record Key",
+      "kind": "button",
+      "refersTo": "button-record",
+      "description": "The single lit control: arms a take. Large transport size.",
+      "html": "<button class=\"ds-key-record\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\"/><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/></svg>Record answer</button>",
+      "css": ".ds-key-record{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:3px;font-family:Archivo,system-ui,sans-serif;font-weight:500;cursor:pointer;transition:transform 150ms cubic-bezier(0.22,1,0.36,1),background-color 150ms cubic-bezier(0.22,1,0.36,1),border-color 150ms,box-shadow 150ms;height:56px;padding:0 24px;font-size:1.0625rem;background:rgb(var(--lab-red));border-color:rgb(var(--lab-red));color:#fff;box-shadow:0 1px 0 rgb(var(--lab-highlight) / 0.06) inset,0 2px 6px rgb(0 0 0 / 0.4);} .ds-key-record:hover{background:rgb(var(--lab-red) / 0.9);} .ds-key-record:active{box-shadow:0 1px 3px rgb(0 0 0 / 0.5) inset;transform:translateY(1px);} .ds-key-record:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Primary Brass Key",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Unlocked reveal key and caution-positive actions.",
+      "html": "<button class=\"ds-key-primary\">Reveal answer</button>",
+      "css": ".ds-key-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:3px;font-family:Archivo,system-ui,sans-serif;font-weight:500;cursor:pointer;transition:transform 150ms cubic-bezier(0.22,1,0.36,1),background-color 150ms cubic-bezier(0.22,1,0.36,1),border-color 150ms,box-shadow 150ms;height:44px;padding:0 16px;font-size:0.9375rem;background:rgb(var(--lab-brass));border-color:rgb(var(--lab-brass));color:rgb(20,17,12);box-shadow:0 1px 0 rgb(var(--lab-highlight) / 0.06) inset,0 2px 6px rgb(0 0 0 / 0.4);} .ds-key-primary:hover{background:rgb(var(--lab-brass) / 0.9);} .ds-key-primary:active{box-shadow:0 1px 3px rgb(0 0 0 / 0.5) inset;transform:translateY(1px);} .ds-key-primary:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Neutral Key",
+      "kind": "button",
+      "refersTo": "button-neutral",
+      "description": "Default transport key on plate.",
+      "html": "<button class=\"ds-key-neutral\">Progress</button>",
+      "css": ".ds-key-neutral{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:3px;font-family:Archivo,system-ui,sans-serif;font-weight:500;cursor:pointer;transition:transform 150ms cubic-bezier(0.22,1,0.36,1),background-color 150ms cubic-bezier(0.22,1,0.36,1),border-color 150ms,box-shadow 150ms;height:44px;padding:0 16px;font-size:0.9375rem;background:rgb(var(--lab-plate));border-color:rgb(var(--lab-rule-strong));color:rgb(var(--lab-legend));box-shadow:0 1px 0 rgb(var(--lab-highlight) / 0.06) inset,0 2px 6px rgb(0 0 0 / 0.4);} .ds-key-neutral:hover{background:rgb(var(--lab-rule));border-color:rgb(var(--lab-legend-3));} .ds-key-neutral:active{box-shadow:0 1px 3px rgb(0 0 0 / 0.5) inset;transform:translateY(1px);} .ds-key-neutral:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Quiet Key",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Low-emphasis transport key.",
+      "html": "<button class=\"ds-key-quiet\">Answer without speaking</button>",
+      "css": ".ds-key-quiet{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:3px;font-family:Archivo,system-ui,sans-serif;font-weight:500;cursor:pointer;transition:transform 150ms cubic-bezier(0.22,1,0.36,1),background-color 150ms cubic-bezier(0.22,1,0.36,1),border-color 150ms,box-shadow 150ms;height:44px;padding:0 16px;font-size:0.9375rem;background:transparent;border-color:transparent;color:rgb(var(--lab-legend-2));} .ds-key-quiet:hover{background:rgb(var(--lab-plate));color:rgb(var(--lab-legend));} .ds-key-quiet:active{transform:translateY(1px);} .ds-key-quiet:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Channel Two Locked Reveal",
+      "kind": "custom",
+      "refersTo": "button-reveal-locked",
+      "description": "Inert locked reveal panel: dashed, struck-through legend, footnote escape.",
+      "html": "<section class=\"ds-ch2\"><div class=\"ds-ch2-head\"><span class=\"ds-ch2-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg></span><div><h2 class=\"ds-ch2-legend\">Answer locked</h2><p class=\"ds-ch2-help\">Record your take first.</p></div></div><div class=\"ds-ch2-foot\"><button class=\"ds-ch2-key\" disabled><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg>Reveal answer</button><p class=\"ds-ch2-note\"><button class=\"ds-ch2-link\">Reveal without trying</button> — does not count as practice.</p></div></section>",
+      "css": ".ds-ch2{background:rgb(var(--lab-chassis));border:1px solid rgb(var(--lab-rule));border-radius:5px;box-shadow:0 1px 0 rgb(var(--lab-highlight) / 0.05) inset,0 1px 2px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.6)),0 10px 28px -18px rgb(0 0 0 / var(--lab-shadow-strength));border-style:dashed;overflow:hidden;font-family:Archivo,system-ui,sans-serif;} .ds-ch2-head{display:flex;gap:12px;align-items:center;padding:16px;} .ds-ch2-icon{color:rgb(var(--lab-cool));display:inline-flex;} .ds-ch2-legend{font-family:Archivo,system-ui,sans-serif;font-stretch:118%;font-weight:600;font-size:0.6875rem;letter-spacing:0.14em;text-transform:uppercase;line-height:1;color:rgb(var(--lab-legend-3));margin:0;color:rgb(var(--lab-cool));text-decoration:line-through;text-decoration-color:rgb(var(--lab-cool) / 0.5);} .ds-ch2-help{margin:6px 0 0;font-size:0.9375rem;line-height:1.6;color:rgb(var(--lab-legend-3));} .ds-ch2-foot{background:rgb(var(--lab-felt));border-top:1px solid rgb(var(--lab-rule));padding:12px 16px;} .ds-ch2-key{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:3px;font-family:Archivo,system-ui,sans-serif;font-weight:500;cursor:pointer;transition:transform 150ms cubic-bezier(0.22,1,0.36,1),background-color 150ms cubic-bezier(0.22,1,0.36,1),border-color 150ms,box-shadow 150ms;height:56px;padding:0 24px;font-size:1.0625rem;background:transparent;border:1px dashed rgb(var(--lab-rule-strong));color:rgb(var(--lab-legend-3));box-shadow:none;cursor:not-allowed;} .ds-ch2-note{margin:10px 0 0;font-size:0.6875rem;letter-spacing:0.08em;line-height:1.6;color:rgb(var(--lab-legend-3));} .ds-ch2-link{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(var(--lab-rule-strong));text-underline-offset:2px;cursor:pointer;} .ds-ch2-link:hover{color:rgb(var(--lab-legend-2));} .ds-ch2-link:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Faceplate Panel with Legend Header",
+      "kind": "card",
+      "refersTo": "faceplate",
+      "description": "Every grouped region: legend heading, hairline, body.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-legend\">Review today</h2><p class=\"ds-panel-body\">Nothing due. What you answered is still fresh.</p></section>",
+      "css": ".ds-panel{background:rgb(var(--lab-chassis));border:1px solid rgb(var(--lab-rule));border-radius:5px;box-shadow:0 1px 0 rgb(var(--lab-highlight) / 0.05) inset,0 1px 2px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.6)),0 10px 28px -18px rgb(0 0 0 / var(--lab-shadow-strength));overflow:hidden;font-family:Archivo,system-ui,sans-serif;} .ds-panel-legend{font-family:Archivo,system-ui,sans-serif;font-stretch:118%;font-weight:600;font-size:0.6875rem;letter-spacing:0.14em;text-transform:uppercase;line-height:1;color:rgb(var(--lab-legend-3));margin:0;padding:12px 16px;border-bottom:1px solid rgb(var(--lab-rule));} .ds-panel-body{margin:0;padding:20px 16px;font-size:0.9375rem;line-height:1.6;color:rgb(var(--lab-legend-3));max-width:68ch;}"
+    },
+    {
+      "name": "Search Well",
+      "kind": "input",
+      "refersTo": "recess-well",
+      "description": "Recessed field with brass caret.",
+      "html": "<label class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input placeholder=\"Search questions\" /></label>",
+      "css": ".ds-search{display:flex;align-items:center;gap:10px;padding:0 12px;background:rgb(var(--lab-felt));border:1px solid rgb(var(--lab-rule));border-radius:4px;box-shadow:0 2px 5px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.5)) inset;color:rgb(var(--lab-legend-3));} .ds-search input{height:44px;width:100%;background:transparent;border:0;outline:none;font:400 0.9375rem/1.6 Archivo,system-ui,sans-serif;color:rgb(var(--lab-legend));caret-color:rgb(var(--lab-brass));} .ds-search input::placeholder{color:rgb(var(--lab-legend-3));opacity:1;} .ds-search:focus-within{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Two-Position Language Switch",
+      "kind": "nav",
+      "refersTo": "recess-well",
+      "description": "PT/EN as a physical two-position switch.",
+      "html": "<div class=\"ds-switch\" role=\"group\" aria-label=\"Language\"><button aria-pressed=\"true\" class=\"ds-switch-on\">PT</button><button aria-pressed=\"false\">EN</button></div>",
+      "css": ".ds-switch{display:inline-flex;gap:1px;padding:1px;background:rgb(var(--lab-felt));border:1px solid rgb(var(--lab-rule));border-radius:4px;box-shadow:0 2px 5px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.5)) inset;} .ds-switch button{font-family:Archivo,system-ui,sans-serif;font-stretch:118%;font-weight:600;font-size:0.6875rem;letter-spacing:0.14em;text-transform:uppercase;line-height:1;color:rgb(var(--lab-legend-3));border:0;background:transparent;border-radius:2px;padding:6px 10px;cursor:pointer;transition:all 150ms cubic-bezier(0.22,1,0.36,1);} .ds-switch button:hover{color:rgb(var(--lab-legend-2));} .ds-switch .ds-switch-on{background:rgb(var(--lab-plate));color:rgb(var(--lab-legend));box-shadow:0 1px 3px rgb(0 0 0 / 0.5) inset;} .ds-switch button:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    },
+    {
+      "name": "Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Non-interactive descriptor; trap is the brass variant.",
+      "html": "<span class=\"ds-tag\">Intermediate</span> <span class=\"ds-tag ds-tag-brass\">Trap</span>",
+      "css": ".ds-tag{font-family:Archivo,system-ui,sans-serif;font-stretch:118%;font-weight:600;font-size:0.6875rem;letter-spacing:0.14em;text-transform:uppercase;line-height:1;color:rgb(var(--lab-legend-3));display:inline-flex;align-items:center;border:1px solid rgb(var(--lab-rule));border-radius:3px;padding:2px 6px;} .ds-tag-brass{color:rgb(var(--lab-brass));border-color:rgb(var(--lab-brass) / 0.35);}"
+    },
+    {
+      "name": "Channel Strip",
+      "kind": "custom",
+      "refersTo": "level-meter",
+      "description": "Skill name, tabular readout and 24-segment level meter.",
+      "html": "<div class=\"ds-strip\"><div class=\"ds-strip-row\"><span class=\"ds-strip-name\">JavaScript</span><span class=\"ds-strip-val\">38%</span></div><div class=\"ds-meter\"><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"on\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span><span class=\"\"></span></div></div>",
+      "css": ".ds-strip{padding:12px;border-radius:3px;font-family:Archivo,system-ui,sans-serif;transition:background-color 150ms;} .ds-strip:hover{background:rgb(var(--lab-plate));} .ds-strip-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;} .ds-strip-name{font-size:0.9375rem;font-weight:500;color:rgb(var(--lab-legend));} .ds-strip-val{font:400 0.75rem/1.125rem 'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;color:rgb(var(--lab-legend-2));} .ds-meter{display:flex;gap:1px;height:10px;padding:1px;margin-top:8px;background:rgb(var(--lab-felt));border:1px solid rgb(var(--lab-rule));border-radius:4px;box-shadow:0 2px 5px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.5)) inset;overflow:hidden;} .ds-meter span{flex:1;background:rgb(var(--lab-rule));} .ds-meter span.on{background:rgb(var(--lab-brass));}"
+    },
+    {
+      "name": "Library Row",
+      "kind": "card",
+      "refersTo": "list-row",
+      "description": "Title plus one silkscreened legend line; state prints only when not new.",
+      "html": "<ul class=\"ds-rows\"><li><a href=\"#\" class=\"ds-row\"><span class=\"ds-row-title\">Event loop order: timers and microtasks</span><span class=\"ds-row-meta\"><span class=\"ds-lamp\"></span><span class=\"ds-row-state\">Learning</span><span>Code reading · JavaScript · Intermediate · 5 min</span></span></a></li></ul>",
+      "css": ".ds-rows{list-style:none;margin:0;padding:0;border:1px solid rgb(var(--lab-rule));border-radius:5px;overflow:hidden;} .ds-row{display:block;padding:14px 56px 14px 16px;background:rgb(var(--lab-chassis));text-decoration:none;font-family:Archivo,system-ui,sans-serif;transition:background-color 150ms;} .ds-row:hover{background:rgb(var(--lab-plate));} .ds-row:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;} .ds-row-title{display:block;font-size:0.9375rem;font-weight:500;color:rgb(var(--lab-legend));} .ds-row-meta{font-family:Archivo,system-ui,sans-serif;font-stretch:118%;font-weight:600;font-size:0.6875rem;letter-spacing:0.14em;text-transform:uppercase;line-height:1;color:rgb(var(--lab-legend-3));display:flex;align-items:center;gap:10px;margin-top:8px;} .ds-lamp{width:8px;height:8px;border-radius:999px;background:rgb(var(--lab-brass));box-shadow:inset 0 0 0 1px rgb(0 0 0 / 0.3);} .ds-row-state{color:rgb(var(--lab-brass));margin-left:-4px;}"
+    },
+    {
+      "name": "Session Rail",
+      "kind": "custom",
+      "refersTo": "session-rail",
+      "description": "Segmented practice progress: one cell per activity; done brass, skipped rule-strong, current legend-3.",
+      "html": "<div class=\"ds-rail\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"6\" aria-valuenow=\"3\"><span class=\"ds-done\"></span><span class=\"ds-done\"></span><span class=\"ds-skip\"></span><span class=\"ds-cur\"></span><span></span><span></span></div>",
+      "css": ".ds-rail{display:flex;align-items:stretch;gap:1px;padding:1px;height:10px;width:320px;overflow:hidden;background:rgb(var(--lab-felt));border:1px solid rgb(var(--lab-rule));border-radius:4px;box-shadow:0 2px 5px rgb(0 0 0 / calc(var(--lab-shadow-strength) * 0.5)) inset;} .ds-rail span{flex:1;background:rgb(var(--lab-rule));transition:background-color 200ms;} .ds-rail .ds-done{background:rgb(var(--lab-brass));} .ds-rail .ds-skip{background:rgb(var(--lab-rule-strong));} .ds-rail .ds-cur{background:rgb(var(--lab-legend-3));}"
+    },
+    {
+      "name": "Toggle Chip",
+      "kind": "chip",
+      "refersTo": "chip-toggle",
+      "description": "Multi-select preference toggle (focus, stacks); active is pressed brass ink on a 12% brass wash.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">English</button><button class=\"ds-chip\" aria-pressed=\"false\">Backend</button></div>",
+      "css": ".ds-chips{display:flex;gap:6px;} .ds-chip{font-family:Archivo,system-ui,sans-serif;font-size:0.75rem;line-height:1.125rem;padding:6px 10px;border-radius:3px;border:1px solid rgb(var(--lab-rule-strong));background:rgb(var(--lab-plate));color:rgb(var(--lab-legend-2));cursor:pointer;transition:all 150ms cubic-bezier(0.22,1,0.36,1);} .ds-chip:hover{border-color:rgb(var(--lab-legend-3));color:rgb(var(--lab-legend));} .ds-chip:active{transform:translateY(1px);} .ds-chip[aria-pressed=\"true\"]{border-color:rgb(var(--lab-brass) / 0.5);background:rgb(var(--lab-brass) / 0.12);color:rgb(var(--lab-brass));box-shadow:0 1px 3px rgb(0 0 0 / 0.5) inset;} .ds-chip:focus-visible{outline:2px solid rgb(var(--lab-brass));outline-offset:2px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Language Lab",
+    "overview": "**Creative North Star: \"The Language Lab\"**\n\nDevPrep is a two-channel language lab booth, not a study dashboard. Your take goes on channel one; the model answer sits on channel two, and channel two stays inert until channel one has signal. The rule that you record before you reveal is built into the hardware, not a setting. Every surface is a piece of that equipment: machined faceplates sitting on an acoustically dead room, silkscreened legends, lamps, level meters and transport keys with real travel.\n\nThe density is Operate, not poster. Type stays measured (display tops out at 2.25rem), panels share one header baseline, and the reading field stays achromatic so colour means something wherever it shows up. Colour lives only at edges, lamps, meters and the one armed control. Dark is the default theme because people use this alone at night; the light theme is the same booth with the lights on, using the same token names.\n\nThe brief requires some things that category dashboards also show (a greeting, a study streak, counts, quick category access). They are expressed as instrument parts, never as dashboard furniture: the greeting and streak are one quiet meta line, counts are channel-strip readouts, and categories are a single-column selector list.",
+    "keyCharacteristics": [
+      "Brown-black booth ground with no texture; chassis panels one step lighter.",
+      "Expanded, tracked silkscreen legends (Archivo at 118% width) as the panel headings themselves.",
+      "One lit element per first viewport: the record key.",
+      "Channel two is cool blue-grey, struck through and inert until unlocked.",
+      "Depth comes from machining: a highlight along the top edge, offset shadows, and keys that press into the panel.",
+      "Motion is mechanical and short; nothing floats."
+    ],
+    "rules": [
+      {
+        "name": "The One Lit Element Rule",
+        "body": "In any first viewport, Record Red is the only saturated fill. Brass, sage and blue-grey show up as lamps, ink or hairline tints, never as a competing filled control.",
+        "section": "colors"
+      },
+      {
+        "name": "The Brown Booth Rule",
+        "body": "The ground is brown-black (booth 17 13 10), never blue-black, and it has no grain, noise or texture. The texture was tried and deliberately removed.",
+        "section": "colors"
+      },
+      {
+        "name": "The Achromatic Reading Field Rule",
+        "body": "Prose, prompts and inline code use only legend inks on neutral grounds. Inline code is legend ink on plate, never tinted with an accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Off-Lamp Local Mode Rule",
+        "body": "Local mode is a state of the booth: an off lamp plus a legend in the header, with its explanation in the title and screen-reader text. It is never a banner or a coloured band.",
+        "section": "colors"
+      },
+      {
+        "name": "The Legend Is the Heading Rule",
+        "body": "A silkscreened legend is the real heading element of its panel (set through PanelHeader or Legend). Never put an eyebrow or kicker label above a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Readout Rule",
+        "body": "Counters, percentages, time and counts use tabular figures, so they never change width.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Tiles Rule",
+        "body": "Counts are readouts on channel strips, and categories are a single-column selector list with a tabular count on the right. The product has no stat tiles and no card grids.",
+        "section": "layout"
+      },
+      {
+        "name": "The Quiet Greeting Rule",
+        "body": "The greeting and streak share one meta line above the deck (greeting in legend-2, then streak and total spoken time in legend-3, separated by middots). This line is never a banner or headline.",
+        "section": "layout"
+      },
+      {
+        "name": "The Depth Not Glow Rule",
+        "body": "Affordance comes from travel and shadow. Pressed things sit into the panel; nothing lifts or glows on hover.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Unlit Next Key Rule",
+        "body": "In the practice runner the activity's own record key is the lit element. The footer's \"Próxima atividade\" / \"Concluir\" key is always Neutral: it sits disabled at 40% until the activity is graded, then receives focus, but it never turns red or brass.",
+        "section": "colors"
+      },
+      {
+        "name": "The Truthful Estimate Rule",
+        "body": "Every number on a practice surface is counted, never decorative. Plan minutes are summed from per-activity estimates (0.5 min when no spoken take is required, 1.5 for system design and architecture, 1 otherwise, never below 1). Remaining minutes count only pending activities. Summary time uses real on-screen time capped at four times the estimate. \"Why these activities\" lists a reason only when its count is above 0 and below the session size, so no line restates the whole plan.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "**Do** keep Record Red as the only lit fill in a first viewport; brass is for VU/caution and the unlocked reveal key.",
+      "**Do** set panel headings as silkscreen legends through the panel header, on the shared 12px × 16px baseline.",
+      "**Do** pair every lamp and colour state with a text label.",
+      "**Do** make locked channel two inert by construction: dashed border, transparent ground, no shadow, legend-3 ink, lock icon, and answer blocks absent from the DOM.",
+      "**Do** express counts as channel-strip readouts and categories as a single-column selector list.",
+      "**Do** use JetBrains Mono with tabular figures for counters, percentages, timecode and code only.",
+      "**Do** keep reading text achromatic and within 68ch.",
+      "**Do** keep the runner's next key Neutral; the activity's record key is its lit element.",
+      "**Do** compute every estimate and count from the plan or from real elapsed time, and hide a \"why\" reason whose count is 0 or the whole session.",
+      "**Do** give switch positions and toggles 44px targets on touch-first screens.",
+      "**Do** make every control a transport key with raised-to-pressed travel over 150ms on `cubic-bezier(0.22, 1, 0.36, 1)`; reduced motion makes it instant."
+    ],
+    "donts": [
+      "**Don't** use a blue-black ground, or add grain or noise texture to the booth.",
+      "**Don't** put eyebrow or kicker legends above headings.",
+      "**Don't** render a greeting banner, stat tiles, progress rings or card grids; the greeting and streak stay one quiet meta line.",
+      "**Don't** make \"reveal without trying\" a peer button; it stays a micro footnote link.",
+      "**Don't** tint inline code or prose with an accent colour.",
+      "**Don't** announce local mode with a band or banner; it is an off lamp with a legend.",
+      "**Don't** use zero-offset glows or hover lift; depth is travel and inset shadow.",
+      "**Don't** print the \"new\" state in list rows or add extra chips beyond trap.",
+      "**Don't** use a Record key to start anything except the Home deck session, which hands off to a focused record key.",
+      "**Don't** set a category, session or reason legend above a practice heading; it goes below the `h1` or in the panel header."
+    ]
+  }
+}

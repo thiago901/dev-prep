@@ -1,0 +1,72 @@
+rules_version = '2';
+
+// DevPrep Storage security rules.
+//
+// Recordings are the most sensitive asset in the product: they are the
+// user's own voice, often stumbling through a second language. They are
+// never world-readable, never listable, and never readable by an admin.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function isAudio() {
+      return request.resource.contentType.matches('audio/.*');
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function underBytes(mb) {
+      return request.resource.size < mb * 1024 * 1024;
+    }
+
+    // -------------------------------------------------------------------
+    // Interview attempt recordings. Owner only, both directions.
+    // A 20 MB ceiling comfortably holds a ten-minute Opus answer while
+    // making the path useless as general file storage.
+    // -------------------------------------------------------------------
+    match /recordings/{uid}/{contentId}/{fileName} {
+      allow read: if isOwner(uid);
+      allow write: if isOwner(uid) && isAudio() && underBytes(20);
+      allow delete: if isOwner(uid);
+    }
+
+    // -------------------------------------------------------------------
+    // Avatars. Publicly readable because they render beside a profile.
+    // -------------------------------------------------------------------
+    match /avatars/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isOwner(uid) && isImage() && underBytes(2);
+      allow delete: if isOwner(uid);
+    }
+
+    // -------------------------------------------------------------------
+    // Content media: diagrams and images attached to a question by an
+    // admin. Public read so unauthenticated visitors see the same lesson.
+    // -------------------------------------------------------------------
+    match /content-media/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------
+    // default deny
+    // -------------------------------------------------------------------
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>DevPrep — grave sua resposta antes de ler a nossa</title>
+    <meta
+      name="description"
+      content="Pratique entrevistas técnicas e comportamentais falando em voz alta. A resposta modelo fica travada até você gravar a sua."
+    />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#110D0A" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#E8E3D9" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- Self-hosted so the booth still has its type offline. -->
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrainsmono-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script>
+      // Resolve the theme before first paint so the booth never flashes white.
+      (function () {
+        try {
+          var stored = localStorage.getItem('devprep.theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          var lang = localStorage.getItem('devprep.locale');
+          if (lang === 'en' || lang === 'pt') {
+            document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
+          }
+        } catch (error) {
+          document.documentElement.dataset.theme = 'dark';
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      DevPrep precisa de JavaScript para gravar e reproduzir suas respostas.
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
