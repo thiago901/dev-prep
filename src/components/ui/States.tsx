@@ -87,6 +87,71 @@ export function SkeletonLines({ count = 3, className }: { count?: number; classN
   );
 }
 
+/**
+ * The shape of a screen before its data arrives.
+ *
+ * Shaped like the panels it replaces, so the layout does not jump — and quiet
+ * enough that it reads as "this is coming" rather than as content. A spinner
+ * in the middle of an empty page says only that something is happening
+ * somewhere.
+ */
+export function PageSkeleton({
+  label,
+  rows = 3,
+  className,
+}: {
+  /** Named out loud for screen readers; the skeleton itself is decorative. */
+  label: string;
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <div className={cn('mx-auto max-w-[60rem] space-y-6', className)} role="status" aria-live="polite">
+      <span className="sr-only">{label}</span>
+      <div className="space-y-2.5">
+        <Skeleton className="h-7 w-52" />
+        <Skeleton className="h-3.5 w-80 max-w-full" />
+      </div>
+      {Array.from({ length: rows }, (_, row) => (
+        <div key={row} className="faceplate overflow-hidden">
+          <div className="flex items-center justify-between gap-3 px-4 py-3">
+            <Skeleton className="h-2.5 w-28" />
+            <Skeleton className="h-2.5 w-16" />
+          </div>
+          <div className="h-px w-full bg-rule" />
+          <div className="space-y-3 px-4 py-5">
+            <Skeleton className="h-5 w-3/5" />
+            <SkeletonLines count={2} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * A small spinner for a control that is busy.
+ *
+ * Sized to the text beside it, so a key that is working looks like the same
+ * key rather than a new element.
+ */
+export function InlineSpinner({ label, className }: { label: string; className?: string }) {
+  return (
+    <span className={cn('inline-flex items-center gap-2 text-legend-3', className)}>
+      <span aria-hidden="true" className="inline-flex items-end gap-px">
+        {[0, 1, 2].map((bar) => (
+          <span
+            key={bar}
+            className="w-[3px] animate-lamp-roll rounded-[1px] bg-brass"
+            style={{ height: `${5 + (bar % 2) * 4}px`, animationDelay: `${bar * 130}ms` }}
+          />
+        ))}
+      </span>
+      <span className="legend-type">{label}</span>
+    </span>
+  );
+}
+
 /** The whole-screen state while the booth is still coming up. */
 export function BoothLoading({ label }: { label: string }) {
   return (

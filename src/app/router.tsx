@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './layout/AppShell';
 import { ErrorBoundary } from './ErrorBoundary';
-import { BoothLoading } from '@/components/ui/States';
+import { PageSkeleton } from '@/components/ui/States';
 import { useI18n } from '@/i18n';
 import { HomePage } from '@/features/home/HomePage';
 
@@ -42,6 +42,15 @@ const ProfilePage = lazy(() =>
 const AuthPage = lazy(() =>
   import('@/features/auth/AuthPage').then((module) => ({ default: module.AuthPage })),
 );
+const LearnPage = lazy(() =>
+  import('@/features/learn/LearnPage').then((module) => ({ default: module.LearnPage })),
+);
+const PathPage = lazy(() =>
+  import('@/features/learn/PathPage').then((module) => ({ default: module.PathPage })),
+);
+const SpeakingPage = lazy(() =>
+  import('@/features/speaking/SpeakingPage').then((module) => ({ default: module.SpeakingPage })),
+);
 const PracticePage = lazy(() =>
   import('@/features/practice/PracticePage').then((module) => ({ default: module.PracticePage })),
 );
@@ -60,15 +69,19 @@ export function AppRoutes() {
   return (
     <AppShell>
       <ErrorBoundary>
-        <Suspense fallback={<BoothLoading label={t('common.loading')} />}>
+        <Suspense fallback={<PageSkeleton label={t('common.loading')} />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/learn" element={<LearnPage />} />
+            <Route path="/learn/:slug" element={<PathPage />} />
+            <Route path="/speaking" element={<SpeakingPage />} />
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/practice/session" element={<PracticeSessionPage />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/content/:slug" element={<ContentPage />} />
             <Route path="/flashcards" element={<FlashcardsPage />} />
             <Route path="/english" element={<EnglishPage />} />
+            <Route path="/speaking/english" element={<Navigate to="/speaking" replace />} />
             <Route path="/mock" element={<MockInterviewPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/profile" element={<ProfilePage />} />

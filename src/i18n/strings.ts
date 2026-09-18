@@ -230,6 +230,16 @@ export const STRINGS = {
     en: 'Record your attempt first. Reading before trying is the one way to learn nothing here.',
   },
   'reveal.action': { pt: 'Revelar resposta', en: 'Reveal answer' },
+  'reveal.lockedHelpWrite': {
+    pt: 'Escreva sua resposta primeiro. Ler antes de tentar é a única forma de não aprender nada aqui.',
+    en: 'Write your answer first. Reading before trying is the one way to learn nothing here.',
+  },
+  'reveal.lockedSelect': { pt: 'Explicação travada', en: 'Explanation locked' },
+  'reveal.lockedSelectHelp': {
+    pt: 'Responda primeiro. A explicação aparece junto com o resultado.',
+    en: 'Answer first. The explanation arrives with the result.',
+  },
+  'reveal.actionSelect': { pt: 'Ver explicação', en: 'See the explanation' },
   'reveal.anyway': { pt: 'Revelar sem tentar', en: 'Reveal without trying' },
   'reveal.anyway.help': {
     pt: 'Isso não conta como prática e não avança a revisão.',
@@ -593,8 +603,231 @@ export const STRINGS = {
   'admin.preview': { pt: 'Pré-visualização', en: 'Preview' },
   'admin.export': { pt: 'Exportar JSON', en: 'Export JSON' },
 
+  // --- the ladder: what each activity asks of you ---------------------------
+  'activity.learn': { pt: 'Aprender', en: 'Learn' },
+  'activity.learn.what': {
+    pt: 'Leia um resumo curto do assunto. Nada é cobrado aqui.',
+    en: 'Read a short briefing on the subject. Nothing is graded here.',
+  },
+  'activity.quick-check': { pt: 'Checagem rápida', en: 'Quick check' },
+  'activity.quick-check.what': {
+    pt: 'Algumas afirmações para responder sim ou não. Cada resposta vem explicada.',
+    en: 'A few statements to answer yes or no. Every answer comes explained.',
+  },
+  'activity.decision': { pt: 'Decisão', en: 'Decision' },
+  'activity.decision.what': {
+    pt: 'Decisões que um dev toma de verdade. Arraste o card ou use os botões.',
+    en: 'Calls a developer actually makes. Swipe the card or use the buttons.',
+  },
+  'activity.multiple-choice': { pt: 'Múltipla escolha', en: 'Multiple choice' },
+  'activity.multiple-choice.what': {
+    pt: 'Alternativas plausíveis. Mais de uma funciona; uma é a melhor decisão.',
+    en: 'Plausible options. More than one works; one is the better call.',
+  },
+  'activity.code-reading': { pt: 'Ler código', en: 'Code reading' },
+  'activity.code-reading.what': {
+    pt: 'Diga o que o código faz antes de ver a explicação.',
+    en: 'Say what the code does before you see the explanation.',
+  },
+  'activity.find-the-bug': { pt: 'Achar o bug', en: 'Find the bug' },
+  'activity.find-the-bug.what': {
+    pt: 'O código roda, mas está errado. Encontre onde e por quê.',
+    en: 'The code runs, and it is still wrong. Find where, and why.',
+  },
+  'activity.architecture': { pt: 'Arquitetura', en: 'Architecture' },
+  'activity.architecture.what': {
+    pt: 'Um cenário aberto para resolver em voz alta, com os trade-offs.',
+    en: 'An open scenario to solve out loud, trade-offs included.',
+  },
+  'activity.interview': { pt: 'Pergunta de entrevista', en: 'Interview question' },
+  'activity.interview.what': {
+    pt: 'Uma pergunta real de entrevista. Responda como responderia na hora.',
+    en: 'A real interview question. Answer it the way you would on the day.',
+  },
+  'activity.speaking': { pt: 'Prática falada', en: 'Speaking practice' },
+  'activity.speaking.what': {
+    pt: 'Fale a resposta em voz alta e depois escute a sua própria gravação.',
+    en: 'Say the answer out loud, then listen back to your own take.',
+  },
+  'activity.written': { pt: 'Resposta escrita', en: 'Written answer' },
+  'activity.written.what': {
+    pt: 'Escreva sua resposta antes de comparar com a nossa.',
+    en: 'Write your answer before comparing it with ours.',
+  },
+  'activity.challenge': { pt: 'Desafio', en: 'Challenge' },
+  'activity.challenge.what': {
+    pt: 'Mais difícil de propósito: junta vários conceitos numa coisa só.',
+    en: 'Harder on purpose: several concepts folded into one problem.',
+  },
+
+  // The constant half of an activity chip: how you answer, in one word.
+  'mode.read': { pt: 'Ler', en: 'Read' },
+  'mode.select': { pt: 'Escolher', en: 'Choose' },
+  'mode.write': { pt: 'Escrever', en: 'Write' },
+  'mode.speak': { pt: 'Falar', en: 'Speak' },
+
+  // --- briefing: what happens when you press start --------------------------
+  'briefing.heading': { pt: 'O que vem agora', en: 'What happens next' },
+  'briefing.rung': { pt: 'Nível {level} de 5', en: 'Rung {level} of 5' },
+  'briefing.start': { pt: 'Começar', en: 'Start' },
+  'briefing.recording': {
+    pt: 'Tem gravação nesta. O microfone só liga quando você apertar.',
+    en: 'This one has recording. The microphone only opens when you press it.',
+  },
+  'briefing.writing': {
+    pt: 'Você escreve sua resposta antes de ver a nossa.',
+    en: 'You write your answer before you see ours.',
+  },
+  'briefing.selection': {
+    pt: 'Você responde escolhendo. A explicação vem junto com o resultado.',
+    en: 'You answer by choosing. The explanation comes with the result.',
+  },
+  'briefing.reading': {
+    pt: 'Só leitura. No fim você diz se ficou claro.',
+    en: 'Reading only. At the end you say whether it landed.',
+  },
+
+  // --- learn activity -------------------------------------------------------
+  'learn.gotIt': { pt: 'Entendi', en: 'Got it' },
+  'learn.again': { pt: 'Preciso reler', en: 'Need another pass' },
+  'learn.marked': { pt: 'Anotado', en: 'Noted' },
+  'learn.check': { pt: 'Agora vem a checagem', en: 'The check comes next' },
+
+  // --- quick check ----------------------------------------------------------
+  'quick.yes': { pt: 'Sim', en: 'Yes' },
+  'quick.no': { pt: 'Não', en: 'No' },
+  'quick.right': { pt: 'Isso mesmo', en: 'That is it' },
+  'quick.wrong': { pt: 'Não é isso', en: 'Not this one' },
+  'quick.answerWas': { pt: 'Resposta: {answer}', en: 'Answer: {answer}' },
+  'quick.progress': { pt: '{done} de {total}', en: '{done} of {total}' },
+  'quick.score': { pt: '{right} de {total} certas', en: '{right} of {total} right' },
+
+  // --- decision -------------------------------------------------------------
+  'decision.agree': { pt: 'Eu faria', en: 'I would' },
+  'decision.disagree': { pt: 'Não faria', en: 'I would not' },
+  'decision.help': {
+    pt: 'Arraste o card para o lado ou use os botões.',
+    en: 'Drag the card either way, or use the buttons.',
+  },
+  'decision.yours': { pt: 'Sua decisão', en: 'Your call' },
+  'decision.expected': { pt: 'Decisão esperada', en: 'Expected call' },
+  'decision.match': { pt: 'Mesma decisão', en: 'Same call' },
+  'decision.differ': { pt: 'Decisão diferente', en: 'Different call' },
+  'decision.context': { pt: 'Quando o contrário se defende', en: 'When the other call holds' },
+  'decision.tradeOff': { pt: 'O que você paga', en: 'What it costs you' },
+  'decision.card': { pt: 'Card {current} de {total}', en: 'Card {current} of {total}' },
+
+  // --- written answers ------------------------------------------------------
+  'write.action': { pt: 'Escrever resposta', en: 'Write answer' },
+  'write.title': { pt: 'Sua resposta', en: 'Your answer' },
+  'write.placeholder': {
+    pt: 'Escreva como você responderia numa entrevista.',
+    en: 'Write it the way you would answer in an interview.',
+  },
+  'write.submit': { pt: 'Salvar resposta', en: 'Save answer' },
+  'write.saved': { pt: 'Resposta salva', en: 'Answer saved' },
+  'write.yours': { pt: 'O que você escreveu', en: 'What you wrote' },
+  'write.thought': { pt: 'Só pensei a resposta', en: 'I just thought it through' },
+  'write.count': { pt: '{count} palavras', en: '{count} words' },
+  'write.rewrite': { pt: 'Reescrever', en: 'Rewrite' },
+
+  // --- feedback after answering --------------------------------------------
+  'feedback.title': { pt: 'O que isso ensina', en: 'What this teaches' },
+  'feedback.expected': { pt: 'Raciocínio esperado', en: 'Expected reasoning' },
+  'feedback.why': { pt: 'Por quê', en: 'Why' },
+  'feedback.better': { pt: 'Resposta mais forte', en: 'A stronger answer' },
+  'feedback.yourPick': { pt: 'Sua escolha', en: 'Your pick' },
+  'feedback.quality.ideal': { pt: 'Decisão forte', en: 'Strong call' },
+  'feedback.quality.partial': { pt: 'Parcialmente certa', en: 'Partly right' },
+  'feedback.quality.incorrect': { pt: 'Tem um problema real', en: 'Has a real problem' },
+  'feedback.quality.help.partial': {
+    pt: 'Funciona, mas ignora algo que a entrevista vai cobrar.',
+    en: 'It works, and it skips something the interview will ask about.',
+  },
+
+  // --- learn area and paths -------------------------------------------------
+  'nav.learn': { pt: 'Aprender', en: 'Learn' },
+  'nav.speaking': { pt: 'Falar', en: 'Speaking' },
+  'learn.title': { pt: 'Aprender', en: 'Learn' },
+  'learn.subtitle': {
+    pt: 'Trilhas curtas que vão do conceito até conseguir responder a pergunta de entrevista.',
+    en: 'Short paths that go from the concept to answering the interview question.',
+  },
+  'learn.continueTitle': { pt: 'Continue aprendendo', en: 'Continue learning' },
+  'learn.paths': { pt: 'Trilhas', en: 'Paths' },
+  'learn.explore': { pt: 'Explorar por assunto', en: 'Browse by subject' },
+  'learn.exploreHelp': {
+    pt: 'Todo o banco, filtrado do seu jeito.',
+    en: 'The whole bank, filtered your way.',
+  },
+  'path.stepOf': { pt: 'Etapa {current} de {total}', en: 'Step {current} of {total}' },
+  'path.stepsLegend': { pt: 'Etapas', en: 'Steps' },
+  'path.steps': { pt: '{count} etapas', en: '{count} steps' },
+  'path.start': { pt: 'Começar trilha', en: 'Start path' },
+  'path.continue': { pt: 'Continuar trilha', en: 'Continue path' },
+  'path.restart': { pt: 'Refazer trilha', en: 'Run it again' },
+  'path.done': { pt: 'Trilha concluída', en: 'Path complete' },
+  'path.doneBody': {
+    pt: 'Você percorreu as etapas desta trilha. Ela volta na revisão quando fizer sentido.',
+    en: 'You worked through every step here. It comes back for review when it should.',
+  },
+  'path.remaining': { pt: '~{count} min restantes', en: '~{count} min left' },
+  'path.stepDone': { pt: 'Feito', en: 'Done' },
+  'path.current': { pt: 'Você está aqui', en: 'You are here' },
+  'path.next': { pt: 'Próxima etapa', en: 'Next step' },
+  'path.backToPath': { pt: 'Voltar à trilha', en: 'Back to the path' },
+  'path.empty': {
+    pt: 'Nenhuma trilha ainda. Explore a biblioteca enquanto isso.',
+    en: 'No paths yet. Browse the library in the meantime.',
+  },
+
+  // --- speaking practice area ----------------------------------------------
+  'speaking.title': { pt: 'Praticar falando', en: 'Speaking practice' },
+  'speaking.subtitle': {
+    pt: 'Aqui a resposta é falada. Grave, escute e compare com a resposta modelo.',
+    en: 'Here the answer is spoken. Record it, listen back, compare with the model answer.',
+  },
+  'speaking.filter.technical': { pt: 'Técnicas', en: 'Technical' },
+  'speaking.filter.behavioral': { pt: 'Comportamentais', en: 'Behavioral' },
+  'speaking.filter.architecture': { pt: 'Arquitetura', en: 'Architecture' },
+  'speaking.filter.english': { pt: 'Inglês', en: 'English' },
+  'speaking.filter.hard': { pt: 'Difíceis', en: 'Difficult' },
+  'speaking.filter.recent': { pt: 'Praticadas há pouco', en: 'Recently practiced' },
+  'speaking.filter.review': { pt: 'Para revisar', en: 'Needs review' },
+  'speaking.never': { pt: 'Nunca praticada', en: 'Never practiced' },
+  'speaking.startFirst': { pt: 'Praticar a primeira', en: 'Practise the first one' },
+  'speaking.attempts': { pt: '{count} tentativas', en: '{count} attempts' },
+  'speaking.attempt': { pt: '{count} tentativa', en: '{count} attempt' },
+  'speaking.waiting': { pt: '{count} esperando prática', en: '{count} waiting for a take' },
+  'speaking.empty': {
+    pt: 'Nenhuma pergunta com esses filtros. Tire um filtro para ver mais.',
+    en: 'No questions with these filters. Drop one to see more.',
+  },
+  'speaking.englishArea': { pt: 'Prática guiada de inglês', en: 'Guided English practice' },
+  'speaking.homeBody': {
+    pt: 'Perguntas que valem responder em voz alta.',
+    en: 'Questions worth answering out loud.',
+  },
+
+  // --- home sections --------------------------------------------------------
+  'home.section.learn': { pt: 'Continue aprendendo', en: 'Continue learning' },
+  'home.section.practice': { pt: 'Treino de hoje', en: "Today's practice" },
+  'home.section.speaking': { pt: 'Praticar falando', en: 'Speaking practice' },
+  'home.section.explore': { pt: 'Explorar', en: 'Explore' },
+  'home.learn.startTitle': { pt: 'Comece uma trilha', en: 'Start a path' },
+  'home.learn.startBody': {
+    pt: 'Cada trilha vai do conceito até a pergunta de entrevista, em etapas curtas.',
+    en: 'Each path runs from the concept to the interview question, in short steps.',
+  },
+
+  // --- loading --------------------------------------------------------------
+  'loading.practice': { pt: 'Montando seu treino', en: 'Building your practice' },
+  'loading.activity': { pt: 'Abrindo a atividade', en: 'Opening the activity' },
+  'loading.saving': { pt: 'Salvando', en: 'Saving' },
+
   // --- misc ----------------------------------------------------------------
   'common.loading': { pt: 'Carregando', en: 'Loading' },
+  'common.navigating': { pt: 'Abrindo', en: 'Opening' },
   'common.error.title': { pt: 'Algo quebrou aqui', en: 'Something broke here' },
   'common.error.body': {
     pt: 'Esta tela não conseguiu carregar. Recarregar costuma resolver; se não resolver, seus dados continuam salvos.',

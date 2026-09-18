@@ -3,9 +3,11 @@
  * Run: npx tsx scripts/check-practice.ts
  *
  * Asserts the properties the product promises, against the real content bank:
- * no duplicates, variety caps, English present in longer sessions, no repeat
- * of the previous session, lapsed and missed items prioritised, and focus,
- * stack and difficulty preferences actually moving the plan.
+ * no duplicates, a mix of activity kinds rather than ten of the same thing,
+ * a cap on how much of a session is spoken, a session that climbs the ladder
+ * instead of opening on its hardest question, English present in longer
+ * sessions, no repeat of the previous session, lapsed and missed items
+ * prioritised, and focus, stack and difficulty preferences moving the plan.
  */
 import { SEED_CONTENT } from '../src/data/seed/contentBank';
 import { buildIndex } from '../src/domain/selectors';
@@ -19,6 +21,7 @@ import {
   matchesFocus,
   type PracticeSize,
 } from '../src/domain/practice';
+import { activityKindOf, activityLevelOf, responseModeOf } from '../src/domain/activity';
 import type { ContentProgress } from '../src/domain/types';
 
 const failures: string[] = [];
@@ -37,20 +40,44 @@ const base = {
 for (const size of [5, 10, 20] as PracticeSize[]) {
   const plan = generatePracticeSession(emptyIndex, { ...base, size });
   const ids = plan.map((entry) => entry.content.id);
-  const types = new Map<string, number>();
-  plan.forEach((entry) => types.set(entry.content.type, (types.get(entry.content.type) ?? 0) + 1));
+  const kinds = new Map<string, number>();
+  plan.forEach((entry) => {
+    const kind = activityKindOf(entry.content);
+    kinds.set(kind, (kinds.get(kind) ?? 0) + 1);
+  });
+  const spoken = plan.filter((entry) => responseModeOf(entry.content) === 'speak').length;
 
   check(plan.length === size, `size ${size}: got ${plan.length} items`);
   check(new Set(ids).size === ids.length, `size ${size}: duplicate items`);
-  check(Math.max(...types.values()) <= Math.ceil(size / 4), `size ${size}: one type exceeds a quarter`);
+  check(
+    Math.max(...kinds.values()) <= Math.ceil(size / 4),
+    `size ${size}: one activity kind exceeds a quarter of the session`,
+  );
+  // The whole point of the rebuild: a session is not a queue of recordings.
+  check(
+    spoken <= Math.max(1, Math.round(size / 5)),
+    `size ${size}: ${spoken} spoken items, over the cap`,
+  );
+  check(kinds.size >= 4, `size ${size}: only ${kinds.size} kinds of activity`);
   if (size >= 10) check(plan.some((entry) => isEnglishItem(entry.content)), `size ${size}: no English item`);
-  check(plan[0].content.requiresSpokenAttempt && !plan[0].content.isTrap, `size ${size}: opener is not a calm spoken item`);
+
+  // It opens low on the ladder and does not open on a trap.
+  const openerLevel = activityLevelOf(plan[0].content);
+  const lowestLevel = Math.min(...plan.map((entry) => activityLevelOf(entry.content)));
+  check(openerLevel === lowestLevel, `size ${size}: opener is not on the lowest rung present`);
+  check(!plan[0].content.isTrap, `size ${size}: opener is a trap`);
   check(!isEnglishItem(plan[0].content), `size ${size}: opener is English for a Portuguese-answer user`);
 
-  const adjacentSameType = plan.some((entry, i) => i > 0 && plan[i - 1].content.type === entry.content.type);
+  // And it ends higher than it started.
+  const closingLevel = activityLevelOf(plan[plan.length - 1].content);
+  check(closingLevel >= openerLevel, `size ${size}: the session ends lower than it starts`);
+
+  const adjacentSameKind = plan.some(
+    (entry, i) => i > 0 && activityKindOf(plan[i - 1].content) === activityKindOf(entry.content),
+  );
   console.log(
     `size ${String(size).padStart(2)}: ${plan.length} items, ~${estimateSessionMinutes(plan.map((e) => e.content))} min, ` +
-      `${types.size} types, adjacent same type: ${adjacentSameType}`,
+      `${kinds.size} kinds, ${spoken} spoken, adjacent same kind: ${adjacentSameKind}`,
   );
 }
 

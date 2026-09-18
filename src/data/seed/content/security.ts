@@ -597,6 +597,7 @@ const users = await db.query(
           id: 'sha',
           label: t('SHA-256 com um salt aleatório por usuário', 'SHA-256 with a random per-user salt'),
           correct: false,
+          quality: 'partial',
           why: t(
             'O salt está certo e resolve rainbow table, mas SHA-256 é rápido de propósito — foi desenhado para verificar integridade, não para resistir a força bruta. Uma GPU comum calcula bilhões de SHA-256 por segundo, então um vazamento vira senhas quebradas em horas.',
             'The salt is right and defeats rainbow tables, but SHA-256 is fast on purpose — it was designed to verify integrity, not to resist brute force. A commodity GPU computes billions of SHA-256 per second, so a leak becomes cracked passwords within hours.',

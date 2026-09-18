@@ -1,4 +1,5 @@
 import type {
+  ActivityKind,
   AnswerLevel,
   Block,
   Content,
@@ -7,6 +8,8 @@ import type {
   Locale,
   LocalizedList,
   LocalizedText,
+  OptionQuality,
+  ResponseMode,
 } from '@/domain/types';
 
 /**
@@ -56,8 +59,51 @@ export const setupText = (text: LocalizedText, heading?: LocalizedText): Draft =
 
 export const choices = (
   multiple: boolean,
-  options: Array<{ id: string; label: LocalizedText; correct: boolean; why: LocalizedText }>,
+  options: Array<{
+    id: string;
+    label: LocalizedText;
+    correct: boolean;
+    /** Omit only when the option is plainly wrong or plainly the best. */
+    quality?: OptionQuality;
+    why: LocalizedText;
+  }>,
 ): Draft => ({ kind: 'choices', phase: 'prompt', multiple, options });
+
+/**
+ * Yes/no statements, asked straight after the material. Ids are positional so
+ * an author writes the question and nothing else.
+ */
+export const quickChecks = (
+  questions: Array<{ statement: LocalizedText; answer: boolean; why: LocalizedText }>,
+): Draft => ({
+  kind: 'quick-check',
+  phase: 'prompt',
+  questions: questions.map((question, index) => ({ id: `q${index + 1}`, ...question })),
+});
+
+/** Decision cards. Both calls have to sound like something a developer says. */
+export const decisions = (
+  cards: Array<{
+    statement: LocalizedText;
+    expected: 'agree' | 'disagree';
+    verdict: LocalizedText;
+    why: LocalizedText;
+    context?: LocalizedText;
+    tradeOff?: LocalizedText;
+  }>,
+): Draft => ({
+  kind: 'decision',
+  phase: 'prompt',
+  cards: cards.map((card, index) => ({ id: `d${index + 1}`, ...card })),
+});
+
+/** Prose on the prompt side. Learn cards are built out of these. */
+export const note = (text: LocalizedText, heading?: LocalizedText): Draft => ({
+  kind: 'text',
+  phase: 'prompt',
+  text,
+  ...(heading ? { heading } : {}),
+});
 
 // --- answer-side blocks ----------------------------------------------------
 
@@ -169,6 +215,10 @@ export const links = (items: Array<{ url: string; title: string; source: string 
 export interface ContentInput {
   slug: string;
   type: ContentTypeId;
+  /** The work this asks for. Derived from the blocks and type when omitted. */
+  kind?: ActivityKind;
+  /** Overrides how the user answers, when the kind's default is wrong here. */
+  mode?: ResponseMode;
   title: LocalizedText;
   categoryId: string;
   stackIds?: string[];
@@ -184,6 +234,8 @@ export interface ContentInput {
   blocks: Draft[];
 }
 
+const SPOKEN_KINDS: ActivityKind[] = ['interview', 'speaking', 'architecture'];
+
 const SEED_DATE = '2026-01-15T09:00:00.000Z';
 
 export function content(input: ContentInput): Content {
@@ -196,6 +248,8 @@ export function content(input: ContentInput): Content {
     id: input.slug,
     slug: input.slug,
     type: input.type,
+    ...(input.kind ? { activityKind: input.kind } : {}),
+    ...(input.mode ? { responseMode: input.mode } : {}),
     status: 'published',
     title: input.title,
     categoryId: input.categoryId,
@@ -206,8 +260,13 @@ export function content(input: ContentInput): Content {
     languages: input.languages ?? ['pt', 'en'],
     estimatedMinutes: input.minutes ?? 4,
     ...(input.trap ? { isTrap: true } : {}),
+    // Kept for older items and for the practice generator's own reading of
+    // "does this take a take"; the activity kind is what screens ask now.
     requiresSpokenAttempt:
-      input.spoken ?? !['multiple-choice', 'true-false'].includes(input.type),
+      input.spoken ??
+      (input.kind
+        ? SPOKEN_KINDS.includes(input.kind)
+        : !['multiple-choice', 'true-false'].includes(input.type)),
     blocks,
     relatedContentIds: input.related ?? [],
     createdAt: SEED_DATE,

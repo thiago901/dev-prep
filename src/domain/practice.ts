@@ -1,7 +1,15 @@
-import type { Confidence, Content, ContentTypeId, DifficultyId, Locale } from './types';
+import type {
+  AttemptMode,
+  Confidence,
+  Content,
+  ContentTypeId,
+  DifficultyId,
+  Locale,
+} from './types';
 import type { StudyIndex } from './selectors';
 import { computeSkillLevels, stateOf } from './selectors';
 import { daysUntilDue, isDue } from './srs';
+import { activityKindOf, activityLevelOf, responseModeOf } from './activity';
 
 /**
  * Today's Practice.
@@ -73,7 +81,7 @@ export interface PracticeItem {
   startedAt: string | null;
   finishedAt: string | null;
   attemptId: string | null;
-  mode: 'spoken' | 'silent' | 'selection' | null;
+  mode: AttemptMode | null;
   durationMs: number;
   confidence: PracticeConfidence | null;
 }
@@ -337,32 +345,58 @@ export function generatePracticeSession(
     .map((entry) => ({ ...entry, score: entry.score + random() * 10 }))
     .sort((a, b) => b.score - a.score);
 
-  const typeCap = Math.max(1, Math.ceil(size / 4));
+  const kindCap = Math.max(1, Math.ceil(size / 4));
   const categoryCap = Math.max(2, Math.ceil(size / 3));
   const reviewCap = Math.max(1, Math.ceil(size * 0.4));
+  // Speaking is a tool, not the toll booth. A ten-item session holds two
+  // spoken answers; the rest of the microphone work lives in its own area.
+  const speakCap = Math.max(1, Math.round(size / 5));
 
   const picked: Scored[] = [];
-  const typeCount = new Map<string, number>();
+  const kindCount = new Map<string, number>();
   const categoryCount = new Map<string, number>();
   let reviewCount = 0;
+  let speakCount = 0;
 
   const accept = (entry: Scored, relaxed: boolean): boolean => {
     if (picked.some((item) => item.content.id === entry.content.id)) return false;
-    const types = typeCount.get(entry.content.type) ?? 0;
+    const kind = activityKindOf(entry.content);
+    const kinds = kindCount.get(kind) ?? 0;
     const categories = categoryCount.get(entry.content.categoryId) ?? 0;
     const isReview = entry.reason === 'review' || entry.reason === 'missed';
+    const speaks = responseModeOf(entry.content) === 'speak';
 
     if (!relaxed) {
-      if (types >= typeCap || categories >= categoryCap) return false;
+      if (kinds >= kindCap || categories >= categoryCap) return false;
       if (isReview && reviewCount >= reviewCap) return false;
     }
+    // The speaking cap holds even in the relaxed pass: a session that fills up
+    // with recordings is the problem this whole model exists to fix.
+    if (speaks && speakCount >= speakCap) return false;
 
     picked.push(entry);
-    typeCount.set(entry.content.type, types + 1);
+    kindCount.set(kind, kinds + 1);
     categoryCount.set(entry.content.categoryId, categories + 1);
     if (isReview) reviewCount += 1;
+    if (speaks) speakCount += 1;
     return true;
   };
+
+  // Evidence first, always: what lapsed and what was missed gets its slots
+  // before any shaping rule spends them.
+  for (const entry of scored.filter((item) => item.reason === 'review' || item.reason === 'missed')) {
+    if (picked.length >= size) break;
+    accept(entry, false);
+  }
+
+  // Every session that has room opens the door to something new rather than
+  // only rehearsing: one briefing, and one recognition or decision step.
+  if (size >= 5) {
+    const firstRung = scored.filter((item) => activityLevelOf(item.content) <= 2);
+    for (const entry of firstRung.slice(0, size >= 10 ? 2 : 1)) accept(entry, false);
+    const middleRung = scored.filter((item) => activityLevelOf(item.content) === 3);
+    for (const entry of middleRung.slice(0, size >= 10 ? 2 : 1)) accept(entry, false);
+  }
 
   // Sessions of ten or more always include some English speaking, because
   // spoken English is a first-class skill in this product, not an extra.
@@ -390,20 +424,26 @@ export function generatePracticeSession(
 }
 
 /**
- * Orders a session so it has a beginning, a middle and an end: it opens on a
- * spoken item that is not a trap, never puts two items of the same type or
- * category back to back when it can avoid it, and saves the hardest items
- * for the middle rather than the first rep.
+ * Orders a session so it has a beginning, a middle and an end.
+ *
+ * The session climbs the ladder: it opens on the lowest rung available — a
+ * briefing or a quick check rather than "argue with your senior" — and works
+ * upwards to the spoken answers, never putting two items of the same kind or
+ * category back to back when it can avoid it.
  */
 function orderForFlow(items: Scored[], englishFirst: boolean): Scored[] {
   const remaining = [...items];
   const ordered: Scored[] = [];
 
+  // Lowest rung first. Within a rung the generator's own ranking survives.
+  remaining.sort((a, b) => activityLevelOf(a.content) - activityLevelOf(b.content));
+
   // The first rep should be in the language the user chose to practise in;
   // English still appears later in the session, just not as the way in.
-  const calm = (item: Scored) =>
-    item.content.requiresSpokenAttempt && !item.content.isTrap && item.content.difficulty !== 'expert';
-  let openerIndex = remaining.findIndex((item) => calm(item) && (englishFirst || !isEnglishItem(item.content)));
+  const calm = (item: Scored) => !item.content.isTrap && item.content.difficulty !== 'expert';
+  let openerIndex = remaining.findIndex(
+    (item) => calm(item) && (englishFirst || !isEnglishItem(item.content)),
+  );
   if (openerIndex < 0) openerIndex = remaining.findIndex(calm);
   if (openerIndex >= 0) ordered.push(...remaining.splice(openerIndex, 1));
 
@@ -412,7 +452,8 @@ function orderForFlow(items: Scored[], englishFirst: boolean): Scored[] {
     const nextIndex = remaining.findIndex(
       (item) =>
         !last ||
-        (item.content.type !== last.content.type && item.content.categoryId !== last.content.categoryId),
+        (activityKindOf(item.content) !== activityKindOf(last.content) &&
+          item.content.categoryId !== last.content.categoryId),
     );
     ordered.push(...remaining.splice(nextIndex >= 0 ? nextIndex : 0, 1));
   }
@@ -469,7 +510,9 @@ export function explainPlan(plan: Array<{ content: Content; reason: PracticeReas
     weak: plan.filter((item) => item.reason === 'weak-skill').length,
     technical: plan.filter((item) => TECHNICAL_CATEGORIES.has(item.content.categoryId)).length,
     english: plan.filter((item) => isEnglishItem(item.content)).length,
-    speaking: plan.filter((item) => item.content.requiresSpokenAttempt).length,
+    // What the user will actually be asked to say out loud, which is not the
+    // same as what the old flag called "spoken".
+    speaking: plan.filter((item) => responseModeOf(item.content) === 'speak').length,
   };
 }
 

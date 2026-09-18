@@ -85,6 +85,8 @@ export interface SaveAttemptInput {
   mode: AttemptMode;
   locale: Locale;
   durationMs: number;
+  /** The typed answer, for written attempts. */
+  writtenAnswer?: string;
   blob?: Blob;
   peaks?: number[];
 }
@@ -193,9 +195,15 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         durationMs: input.durationMs,
         recordingId,
         confidence: null,
+        ...(input.writtenAnswer ? { writtenAnswer: input.writtenAnswer } : {}),
         revealed: false,
         starred: false,
-        estimatedWords: input.mode === 'spoken' ? estimateWords(input.durationMs) : undefined,
+        estimatedWords:
+          input.mode === 'spoken'
+            ? estimateWords(input.durationMs)
+            : input.writtenAnswer
+              ? input.writtenAnswer.trim().split(/\s+/).length
+              : undefined,
       };
 
       const nextProgress = applyAttempt(progressFor(input.contentId), input.mode, input.durationMs);

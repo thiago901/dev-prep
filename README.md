@@ -1,11 +1,22 @@
 # DevPrep
 
 Preparação para entrevistas técnicas e comportamentais, com uma regra que o
-produto inteiro obedece: **você grava a sua resposta antes de ler a nossa.**
+produto inteiro obedece: **você tenta antes de ler a resposta.**
 
-O canal um é a sua take. O canal dois — a resposta modelo — fica travado até o
-canal um ter sinal. Isso não é convenção de tela: os blocos de resposta não
-existem no DOM até o gate abrir.
+O canal um é a sua tentativa. O canal dois — a resposta modelo — fica travado
+até o canal um ter sinal. Isso não é convenção de tela: os blocos de resposta
+não existem no DOM até o gate abrir.
+
+O que conta como tentativa depende do trabalho que a atividade pede. O
+microfone é a ferramenta da última etapa, não o pedágio na frente de todas:
+
+```text
+Aprender → Reconhecer → Decidir → Aplicar → Explicar → Falar
+```
+
+Cada conteúdo declara em que degrau está e como se responde (ler, escolher,
+escrever ou falar). Uma sessão de dez atividades traz no máximo duas faladas;
+o resto da prática de voz mora na área de Praticar falando.
 
 ## Rodando
 
@@ -29,11 +40,32 @@ tentativas e gravações (IndexedDB).
 | `npm run check:storage` | Regressão: escritas concorrentes no armazenamento local não perdem dados |
 | `npm run icons` | Regenera os ícones PWA a partir da marca |
 
+## A escada
+
+Onze tipos de atividade, cada um com identidade visual e modo de resposta
+próprios (`src/domain/activity.ts`):
+
+| Tipo | Como se responde |
+| --- | --- |
+| Aprender | Só leitura, e no fim você diz se ficou claro |
+| Checagem rápida | Sim/não, uma afirmação por vez, cada resposta explicada |
+| Decisão | Arrasta o card ou usa os botões; mostra sua decisão contra a esperada |
+| Múltipla escolha | Alternativas plausíveis, graduadas em ideal / parcial / problema real |
+| Ler código, Achar o bug | Resposta escrita |
+| Arquitetura, Pergunta de entrevista, Prática falada | Resposta falada, com escrita como alternativa |
+| Resposta escrita, Desafio | Resposta escrita |
+
+**Trilhas** (`src/data/seed/paths.ts`) encadeiam conteúdos já existentes na
+ordem da escada: a trilha de sessão no navegador vai de um card de conceito
+sobre `localStorage` até defender a escolha numa conversa com um senior. As
+etapas continuam sendo conteúdos comuns — o treino diário reaproveita todas
+sem nenhuma autoria duplicada.
+
 ## Today's Practice
 
 O centro do app é uma sessão curta e finita — 5, 10 ou 20 atividades — que responde "o que eu deveria praticar agora?". Abrir, apertar Começar, praticar, terminar.
 
-- **Geração por evidência, não aleatória** (`src/domain/practice.ts`): cada item recebe pontos por revisão vencida, erro anterior, habilidade fraca, foco, stacks e dificuldade preferidas, e perde pontos se apareceu nas duas últimas sessões, se foi marcado como fácil demais ou já está dominado. Depois a seleção impõe variedade (nenhum formato passa de um quarto da sessão, nenhuma categoria de um terço), inclui inglês falado em sessões de 10+, e ordena para abrir com uma pergunta falada e calma e nunca repetir o mesmo formato em sequência.
+- **Geração por evidência, não aleatória** (`src/domain/practice.ts`): cada item recebe pontos por revisão vencida, erro anterior, habilidade fraca, foco, stacks e dificuldade preferidas, e perde pontos se apareceu nas duas últimas sessões, se foi marcado como fácil demais ou já está dominado. Revisões e erros ganham as vagas primeiro; depois a sessão reserva degraus baixos, impõe variedade (nenhum tipo de atividade passa de um quarto da sessão, nenhuma categoria de um terço), limita as faladas a um quinto, inclui inglês em sessões de 10+, e ordena subindo a escada — abre no degrau mais baixo presente e nunca repete o mesmo tipo em sequência.
 - **Modo imersivo** (`/practice/session`): sem trilho nem barra de navegação; só progresso, a atividade, pular, próxima atividade e sair. Nada avança sozinho e a sessão termina — sem scroll infinito. Tudo é salvo a cada passo.
 - **Resumo com recomendações honestas:** cada recomendação exige um limite de evidência próprio ("resposta em inglês mais curta que o habitual" só aparece com pelo menos três respostas anteriores para comparar). Sem dados suficientes, a tela diz isso.
 - **Confiança em quatro níveis** (não sabia / sabia parte / sabia / fácil demais) alimenta o mesmo agendamento de revisão e as mesmas habilidades do resto do app.
@@ -55,8 +87,8 @@ baixado nesse caso — instalações em modo local nunca carregam os 600 kB.
 
 ```
 src/
-  domain/          regras puras, sem React: tipos, repetição espaçada,
-                   seletores (habilidades, recomendação), simulado, planos
+  domain/          regras puras, sem React: tipos, escada de atividades,
+                   trilhas, repetição espaçada, seletores, simulado, planos
   data/
     ports.ts       as interfaces que as telas usam
     local/         implementação no dispositivo (IndexedDB)
@@ -69,7 +101,8 @@ src/
     ui/            estados vazios, erro, carregamento
   features/
     content/       ContentRenderer + blocos + RecordingDeck (o gate)
-    home, library, flashcards, english, mock, progress, profile, auth, admin
+    home, learn, practice, speaking, library, flashcards, english, mock,
+    progress, profile, auth, admin
 ```
 
 ### Conteúdo é dado

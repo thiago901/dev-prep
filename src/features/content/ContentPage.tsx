@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LuArrowLeft } from 'react-icons/lu';
 import type { Confidence, Locale } from '@/domain/types';
@@ -10,12 +10,14 @@ import { BoothLoading, EmptyState } from '@/components/ui/States';
 import { TransportButton } from '@/components/lab/Transport';
 import { Panel } from '@/components/lab/Panel';
 import { ContentRenderer } from './ContentRenderer';
+import { ActivityBriefing } from './ActivityChip';
 import type { RecordedTake } from '@/hooks/useRecorder';
 
 /** Wires one content item to the study store. All behaviour lives in the renderer. */
 export function ContentPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [started, setStarted] = useState(false);
   const { t } = useI18n();
   const { answerLocale } = useSettings();
   const {
@@ -36,10 +38,7 @@ export function ContentPage() {
     [index.content, slug],
   );
 
-  const attempts = useMemo(
-    () => (content ? attemptsFor(index, content.id) : []),
-    [index, content],
-  );
+  const attempts = useMemo(() => (content ? attemptsFor(index, content.id) : []), [index, content]);
 
   const handleSaveTake = useCallback(
     async (take: RecordedTake, locale: Locale) => {
@@ -66,6 +65,41 @@ export function ContentPage() {
     });
   }, [content, saveAttempt, answerLocale]);
 
+  const handleWritten = useCallback(
+    async (answer: string) => {
+      if (!content) return;
+      await saveAttempt({
+        contentId: content.id,
+        mode: 'written',
+        locale: answerLocale,
+        durationMs: 0,
+        writtenAnswer: answer,
+      });
+    },
+    [content, saveAttempt, answerLocale],
+  );
+
+  /**
+   * Selection activities grade themselves. The app knows what was right, so
+   * asking the user to rate their own correctness would be theatre — and a
+   * worse signal than the answer they just gave.
+   */
+  const handleResult = useCallback(
+    async ({ right, total }: { right: number; total: number }) => {
+      if (!content) return;
+      await saveAttempt({
+        contentId: content.id,
+        mode: 'selection',
+        locale: answerLocale,
+        durationMs: 0,
+      });
+      const confidence: Confidence =
+        right === total ? 'known' : right * 2 >= total ? 'partial' : 'unknown';
+      await grade(content.id, confidence, true);
+    },
+    [content, saveAttempt, grade, answerLocale],
+  );
+
   const handleGrade = useCallback(
     async (confidence: Confidence) => {
       if (!content) return;
@@ -74,7 +108,7 @@ export function ContentPage() {
     [content, grade, attempts.length],
   );
 
-  if (!ready) return <BoothLoading label={t('common.loading')} />;
+  if (!ready) return <BoothLoading label={t('loading.activity')} />;
 
   if (!content) {
     return (
@@ -103,26 +137,34 @@ export function ContentPage() {
         {t('action.back')}
       </TransportButton>
 
-      <ContentRenderer
-        content={content}
-        attempts={attempts}
-        answerLocale={answerLocale}
-        isFavorite={index.favorites.has(content.id)}
-        maxRecordingMs={entitlements.maxRecordingMs}
-        onToggleFavorite={() => toggleFavorite(content.id)}
-        onSaveTake={handleSaveTake}
-        onSilentAttempt={handleSilent}
-        onDeleteAttempt={deleteAttempt}
-        onToggleStar={toggleStarred}
-        onGrade={handleGrade}
-        onRevealWithoutAttempt={() => markRevealedWithoutAttempt(content.id)}
-        getRecordingUrl={getRecordingUrl}
-        contentById={index.byId}
-        onNavigate={(contentId) => {
-          const target = index.byId.get(contentId);
-          if (target) navigate(`/content/${target.slug}`);
-        }}
-      />
+      {/* Nobody should have to click to find out what they just opened. The
+          briefing is skipped once this item has been attempted before. */}
+      {!started && attempts.length === 0 ? (
+        <ActivityBriefing content={content} onStart={() => setStarted(true)} />
+      ) : (
+        <ContentRenderer
+          content={content}
+          attempts={attempts}
+          answerLocale={answerLocale}
+          isFavorite={index.favorites.has(content.id)}
+          maxRecordingMs={entitlements.maxRecordingMs}
+          onToggleFavorite={() => toggleFavorite(content.id)}
+          onSaveTake={handleSaveTake}
+          onSilentAttempt={handleSilent}
+          onDeleteAttempt={deleteAttempt}
+          onToggleStar={toggleStarred}
+          onGrade={handleGrade}
+          onSaveWritten={handleWritten}
+          onResult={(result) => void handleResult(result)}
+          onRevealWithoutAttempt={() => markRevealedWithoutAttempt(content.id)}
+          getRecordingUrl={getRecordingUrl}
+          contentById={index.byId}
+          onNavigate={(contentId) => {
+            const target = index.byId.get(contentId);
+            if (target) navigate(`/content/${target.slug}`);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -12,10 +12,10 @@ import {
 } from '@/domain/practice';
 import { useStudy } from '@/app/providers/StudyProvider';
 import { useI18n } from '@/i18n';
-import { cn } from '@/lib/utils';
 import { Legend, Panel, PanelHeader, PanelRule } from '@/components/lab/Panel';
 import { Lamp } from '@/components/lab/Lamp';
 import { TransportButton, TwoPositionSwitch } from '@/components/lab/Transport';
+import { Chip } from '@/components/ui/Chip';
 import { BoothLoading } from '@/components/ui/States';
 import { renderInline } from '@/features/content/blocks/Prose';
 import { PlanMeta, SessionRail, WhyTheseActivities, sessionName } from './PracticeParts';
@@ -240,20 +240,3 @@ function Field({ label, help, children }: { label: string; help?: string; childr
   );
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'rounded-control border px-2.5 py-1.5 text-meta transition-all duration-150 ease-engage active:translate-y-px',
-        active
-          ? 'border-brass/50 bg-brass/[0.12] text-brass shadow-pressed'
-          : 'border-rule-strong bg-plate text-legend-2 hover:border-legend-3 hover:text-legend',
-      )}
-    >
-      {children}
-    </button>
-  );
-}

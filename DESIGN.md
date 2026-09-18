@@ -216,7 +216,7 @@ A warm achromatic booth with four signal colours, each with exactly one job.
 - **Record Red** (record; record-ink for text on dark grounds): used for the armed or rolling state and for genuine failures. It fills the record key, the rolling counter and error ink. It is the only lit element in a first viewport.
 
 ### Secondary
-- **VU Brass** (brass): used for VU illumination and caution. It lights the "learning" lamp, the unlocked reveal key, favourite stars, active mobile nav icons, the focus ring, the text caret and selection (at 28%). It never fills a first-viewport call to action while a record key is present.
+- **VU Brass** (brass): used for VU illumination, caution, and the one recommended action on a screen. It lights the "learning" lamp, the unlocked reveal key, the recommended start key on Home, Learn, a path and Speaking Practice, favourite stars, active mobile nav icons, the focus ring, the text caret and selection (at 28%). Never two brass fills in one viewport.
 
 ### Tertiary
 - **Channel Two Blue-Grey** (channel2): the model-answer track, cool and desaturated. Used for the locked channel legend (struck through at 50%), lock icons, the "review" lamp and silent-attempt notes.
@@ -233,7 +233,9 @@ A warm achromatic booth with four signal colours, each with exactly one job.
 Light theme tokens (the `-light` keys) keep the same roles under the same names at runtime: `[data-theme='light']` swaps the RGB channel variables, and plate becomes the brightest surface.
 
 ### Named Rules
-**The One Lit Element Rule.** In any first viewport, Record Red is the only saturated fill. Brass, sage and blue-grey show up as lamps, ink or hairline tints, never as a competing filled control.
+**The One Lit Element Rule.** Exactly one saturated fill per first viewport, and it belongs to the single action the screen is recommending. On Home, the learning path and the practice session are ranked, and only the recommended one carries the brass key — the other drops to Neutral *and* to the smaller heading, so size and illumination always agree. Inside an activity the lit key is the one the activity needs: the record key where the answer is spoken, the submit key where it is written, the reveal key once it is unlocked. Brass, sage and blue-grey never appear as a second filled control.
+
+**The Record Red Rule.** Record Red fills one control only: a key that arms or is rolling a take. It is not a way to start a session, a path or a screen, because a session now opens on whatever rung comes first — often a briefing with nothing to record. Red also carries genuine failure ink. Nothing else.
 
 **The Brown Booth Rule.** The ground is brown-black (booth 17 13 10), never blue-black, and it has no grain, noise or texture. The texture was tried and deliberately removed.
 
@@ -241,7 +243,7 @@ Light theme tokens (the `-light` keys) keep the same roles under the same names 
 
 **The Off-Lamp Local Mode Rule.** Local mode is a state of the booth: an off lamp plus a legend in the header, with its explanation in the title and screen-reader text. It is never a banner or a coloured band.
 
-**The Unlit Next Key Rule.** In the practice runner the activity's own record key is the lit element. The footer's "Próxima atividade" / "Concluir" key is always Neutral: it sits disabled at 40% until the activity is graded, then receives focus, but it never turns red or brass.
+**The Unlit Next Key Rule.** In the practice runner the lit element belongs to the activity on screen — the record key where the answer is spoken, the submit key where it is written, the reveal key once it is unlocked, and nothing at all on a card that only asks to be read. The footer's "Próxima atividade" / "Concluir" key is always Neutral: it sits disabled at 40% until the activity is finished, then receives focus, but it never turns red or brass.
 
 ## Typography
 
@@ -253,7 +255,7 @@ Light theme tokens (the `-light` keys) keep the same roles under the same names 
 
 ### Hierarchy
 - **Deck** (600, 2.25rem, 1.16, -0.025em): page titles such as Library and content titles. Limited to 68ch.
-- **Prompt / Prompt Large** (500, 1.375rem, rising to 1.75rem from the sm breakpoint): the question loaded on the Home deck and in drills.
+- **Prompt / Prompt Large** (500, 1.375rem, rising to 1.75rem from the sm breakpoint): the heading of the recommended section on Home, the question or statement inside an activity, and the decision card.
 - **Body Large** (500, 1.0625rem, 1.65): empty and error state titles, the wordmark (600, 108% width).
 - **Body** (400, 0.9375rem, 1.6): all reading text and list-row titles. The measure is 68ch (`max-w-read`).
 - **Meta** (0.75rem, 1.125rem): the greeting/streak line, row descriptions, table row heads, small counters.
@@ -271,16 +273,16 @@ Light theme tokens (the `-light` keys) keep the same roles under the same names 
 
 The app shell is centred at up to 78rem. It has a sticky 56px header (wordmark and local-mode lamp on the left; language switch and theme key on the right). From `lg` up there is a 13.5rem left rail; below that, a fixed bottom transport bar with 4.5rem keys, safe-area padding and a "more" drawer. The main column gap is 32px, and vertical padding is 24px, or 32px from lg.
 
-Home uses one column, which splits from `xl` into a flexible deck column and a 20rem monitor-bank aside. The deck comes first, then the review queue and the subject list; the monitor bank spans the right-hand rows. Panels stack with a 24px gap. Inside a panel, headers are padded 12px × 16px, bodies 20px × 16px, and footers and transport rows sit on felt at 12px × 16px. List rows are divided by rule hairlines at 60% opacity.
+Home uses one column, which splits from `xl` into a flexible main column and a 20rem monitor-bank aside. The recommended section comes first, then the other sections in rank order, then speaking practice and the subject list; the monitor bank and the review queue sit in the aside. Panels stack with a 24px gap. Inside a panel, headers are padded 12px × 16px, bodies 20px × 16px, and footers and transport rows sit on felt at 12px × 16px. List rows are divided by rule hairlines at 60% opacity.
 
 The spacing rhythm is 6 / 12 / 16 / 24 / 32px. Reading text never exceeds 68ch, even inside wide panels.
 
 ### Named Rules
 **The No Tiles Rule.** Counts are readouts on channel strips, and categories are a single-column selector list with a tabular count on the right. The product has no stat tiles and no card grids.
 
-**The Quiet Greeting Rule.** The greeting and streak share one meta line above the deck (greeting in legend-2, then streak and total spoken time in legend-3, separated by middots). This line is never a banner or headline.
+**The Quiet Greeting Rule.** The greeting and streak share one meta line above the first section of Home (greeting in legend-2, then streak and total spoken time in legend-3, separated by middots). This line is never a banner or headline.
 
-The streak carries an unlit flame icon (legend-3, beside legend-2 text). The user asked for the flame; it stays unlit so the greeting line never competes with the deck.
+The streak carries an unlit flame icon (legend-3, beside legend-2 text). The user asked for the flame; it stays unlit so the greeting line never competes with the recommended section.
 
 Today's Practice keeps the shell's rhythm. The practice desk and the runner use a 52rem column. On Home, the "got five minutes?" panel is removed from the grid when it is hidden, and the explicit xl row template shrinks with it, so no empty row is left. The runner is immersive: no rail and no transport bar. It has a sticky 56px booth-at-95% header (mark, session name from sm, mono counter `n / total`, reason lamp and legend, remaining minutes from md, a quiet exit key) with the session rail under it. A fixed footer with safe-area padding holds the status line, a quiet sm Skip key and the lg next key. The main column reserves 160px of bottom padding so the footer never covers content. On mobile, preference switches keep 44px positions, and the four-position difficulty switch becomes a 2×2 grid, returning to inline from sm.
 
@@ -308,7 +310,7 @@ Every button is a transport key with real mechanical travel.
 - **Shape:** gently squared (3px), 1px border, medium weight.
 - **Sizes:** sm is 36px high (meta text), md is 44px (body text), lg is 56px (body-large text). Record on a phone must be the easiest target.
 - **Record:** a red fill with white ink. Used only for arming a take. It carries the microphone icon.
-- **Record exception, Home deck:** the Today's Practice Start / Continue key is Record because pressing it opens the runner on a focused "Gravar resposta" record key (`autoFocusRecord`). Every other start key (session list, quick panel, summary) is Neutral, with an arrow icon where it moves you forward.
+- **Record is never a start key.** Starting a session, a path or an activity is Primary (the recommended one) or Neutral with an arrow (everything else). Record appears inside an activity whose answer is spoken, and the runner focuses it on arrival (`autoFocusRecord`) only for those.
 - **Primary:** a brass fill with near-black ink. Reserved for the unlocked reveal key and equivalent caution-positive actions.
 - **Neutral:** a plate fill with a rule-strong border. Hover goes to the rule fill with a legend-3 border.
 - **Quiet:** transparent with legend-2 ink. Hover goes to a plate fill with legend ink.
@@ -339,8 +341,10 @@ Every button is a transport key with real mechanical travel.
 - **Toggle chip:** multi-select preferences (focus, stacks). At rest it is plate with a rule-strong border and legend-2 meta text. When active it is pressed, with brass ink, a 50% brass border and a 12% brass wash. Its state is `aria-pressed`.
 
 ### Navigation
+- **Six destinations, one question each:** Início (what now?), Aprender (what can I learn?), Treino (what can I practise?), Falar (what can I answer out loud?), Progresso (how am I doing?), Perfil. The library, the flashcards and the mock interview are reached from the screen they belong to, not from the rail, because they are collections rather than destinations.
+- **Mobile carries four plus the drawer.** The transport strip holds Início, Aprender, Treino and Falar; everything else lives in "Mais". Five cells is what fits 390px without clipping a key.
 - **Rail (lg+):** body-type items with icons. Active items are plate, legend and pressed; inactive items are legend-3, with a chassis hover. Secondary destinations sit below a rule divider.
-- **Mobile transport bar:** fixed to the bottom on booth at 95% with blur, with 4.5rem keys. Icons sit above 0.625rem legend labels, and the active icon is brass.
+- **Mobile transport bar:** fixed to the bottom on booth at 95% with blur, with 4.5rem keys. Icons sit above 0.625rem legend labels, and the active icon is brass. Never more than five cells.
 
 ### Lamps, Level Meters and Channel Strips
 - **Lamp:** an 8px (or 10px) round lamp with an inner 30% black ring, in off/monitor/brass/record/channel2. It is always paired with a text legend. Only a rolling take pulses (1.6s).
@@ -349,9 +353,22 @@ Every button is a transport key with real mechanical travel.
 - **Channel Strip:** a name plus a mono percentage readout (or a lamp and legend badge) over a meter. Compact mode uses meta names and an 8px meter for banks where most strips read zero.
 - **Waveform / Counter:** the waveform is built from the real peak trail and falls back to a flat line, never fake data. Counters are mono and tabular, in legend, record-ink or muted ink.
 
+### The Ladder
+The product teaches in six rungs — Learn, Recognise, Decide, Apply, Explain, Speak — and every content item declares which rung it sits on and how it is answered (read, select, write, speak). That declaration drives the UI, not a label on top of it.
+
+- **Activity chip:** the fixed identity of an activity, in the same shape everywhere (list row, briefing, card header, runner). An icon, the kind name, a hairline, and the answer mode in legend-3: "LER CÓDIGO | ESCREVER". It is inert — never a control — and it always sits *below* the heading it describes.
+- **Briefing:** before an activity starts outside a session, a panel says what happens: the heading, the chip, one line naming the work, one line naming how it will be answered, the minutes, and a Primary start key. The panel header carries a labelled five-cell rung meter ("Nível 3 de 5"); the meter never appears without its legend.
+- **Learn card:** read-only. No gate, no lock panel, no microphone. It ends on a footer with a Primary "Entendi" and a Neutral "Preciso reler", which is the only grading a card with no question can honestly ask for.
+- **Quick check:** one statement at a time on a faceplate, two 44px keys, and an explanation on felt for every answer — right ones included. The explanation region is a live region.
+- **Decision:** a recessed card that drags with the pointer and rotates with travel, side legends lighting only in the direction of travel, and two Neutral keys that do exactly the same thing. Never gesture-only. The verdict panel pairs "sua decisão" with "decisão esperada" and a match lamp, then the reasoning, the context and the trade-off.
+- **Multiple choice:** options grade to ideal (monitor), partly right (brass) or a real problem (record), and the option the user picked is marked "sua escolha". A set with no partly-right option is a recall quiz, not an engineering question.
+- **Written deck:** a recessed textarea on felt with a word count, a Primary submit and a quiet "só pensei a resposta" escape. After the gate opens, what the user wrote stays on screen above the model answer.
+- **Gate by mode:** the locked channel-two panel appears only where there is an answer side to withhold. Selection activities get selection copy and no "reveal without trying" footnote — that escape exists for a broken microphone, and there is no such thing as a broken multiple choice.
+
 ### Today's Practice
 - **Session Rail:** a 10px recessed meter with one flex cell per activity and 1px gaps. The frame never resizes, so progress reads by position. Done cells are brass, skipped cells are rule-strong, the activity on screen is legend-3, and the rest are rule. It is a `progressbar` counting done plus skipped.
-- **Home deck:** the panel legend is the section heading. The next question is the page's `h1` in prompt type, and the category · difficulty (· trap) legend line sits *below* it, never above. Plan meta (count · minutes) is a mono meta readout in the header actions. The transport row pairs the one key with inert channel two. "Why these activities" sits under a rule: a legend label over lamp-plus-meta counts (review brass, weak record, English channel2, others off).
+- **Home sections:** Home ranks four things — continue a path, today's practice, speaking practice, explore. The recommended section is rendered first, carries the page's `h1` in prompt type and the one brass key; the others follow with a body-large `h2` and Neutral keys. Plan meta (count · minutes) is a mono meta readout in the header actions, and the session's mix is shown as activity chips before anything is pressed. "Why these activities" sits under a rule: a legend label over lamp-plus-meta counts (review brass, weak record, English channel2, others off).
+- **Session composition:** a session climbs the ladder — it opens on the lowest rung present and ends no lower than it started — and no more than a fifth of it is spoken. Speaking Practice is where the microphone work lives.
 - **Practice desk:** sessions are a selector list. Each row has a body-medium name, an optional brass "daily goal" lamp, a PlanMeta readout and a Neutral arrow start key. The goal row opens a felt strip with its "why" counts.
 - **Runner reason lamp:** brass for review or missed, off otherwise, always with its legend.
 - **Summary:** a deck `h1` with an inline mono `completed / total` in legend-2 and a meta line (time · recordings). Below it are faceplates: compact channel strips (completed brass, knew monitor), kind rows with legend-3 icons and mono counts, a brass-lamp needs-review list, and recommendation prose. It ends on a Neutral lg "back home" key and a Quiet "see progress" key. There is no "one more session".
@@ -388,5 +405,9 @@ Every button is a transport key with real mechanical travel.
 - **Don't** announce local mode with a band or banner; it is an off lamp with a legend.
 - **Don't** use zero-offset glows or hover lift; depth is travel and inset shadow.
 - **Don't** print the "new" state in list rows or add extra chips beyond trap.
-- **Don't** use a Record key to start anything except the Home deck session, which hands off to a focused record key.
+- **Don't** use a Record key to start anything. Red arms a take; Primary recommends; Neutral carries you forward.
+- **Don't** let the biggest heading and the lit key sit in different sections of the same screen.
+- **Don't** offer a microphone for an activity whose answer is a selection, and don't show a locked answer panel where there is no answer side.
+- **Don't** put an activity chip, rung meter or legend above a heading.
+- **Don't** leave an answered state silent: every explanation, verdict and grade is inside a polite live region.
 - **Don't** set a category, session or reason legend above a practice heading; it goes below the `h1` or in the panel header.

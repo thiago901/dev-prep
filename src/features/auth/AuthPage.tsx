@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n';
 import { Legend, Panel, PanelRule } from '@/components/lab/Panel';
 import { TransportButton } from '@/components/lab/Transport';
 import { Wordmark } from '@/components/brand/Wordmark';
+import { GoogleMark } from '@/components/brand/GoogleMark';
 
 /**
  * Sign-in.
@@ -25,6 +26,7 @@ export function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -67,16 +69,26 @@ export function AuthPage() {
 
       <Panel className="overflow-hidden">
         <div className="p-4">
-          <TransportButton
-            variant="neutral"
-            size="lg"
-            fullWidth
+          {/* Google's own mark, at Google's own size, on our key. A sign-in
+              button without it reads as a link to somewhere else. */}
+          <button
+            type="button"
+            disabled={googleBusy || busy}
             onClick={() => {
-              void signInWithGoogle().then(() => navigate('/'));
+              setGoogleBusy(true);
+              void signInWithGoogle()
+                .then(() => navigate('/'))
+                .finally(() => setGoogleBusy(false));
             }}
+            className="flex h-12 w-full items-center justify-center gap-3 rounded-control border border-rule-strong bg-plate px-4 text-body text-legend shadow-raised transition-all duration-150 ease-engage hover:border-legend-3 hover:bg-chassis focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/60 active:translate-y-px active:shadow-pressed disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
           >
-            {t('auth.google')}
-          </TransportButton>
+            {googleBusy ? (
+              <LuLoader aria-hidden="true" className="animate-spin text-legend-3" />
+            ) : (
+              <GoogleMark />
+            )}
+            <span>{t('auth.google')}</span>
+          </button>
         </div>
 
         <PanelRule />

@@ -49,6 +49,34 @@ export type ContentTypeId =
   | 'refactoring'
   | 'security';
 
+/**
+ * What the user is about to *do*, as opposed to what the item is about.
+ *
+ * `type` describes the material; `ActivityKind` describes the work. The two
+ * are separate because the same subject is taught by reading it, checked by a
+ * yes/no, argued by a decision and finally answered out loud — and the screen
+ * has to name that work before the user commits to it.
+ */
+export type ActivityKind =
+  | 'learn'
+  | 'quick-check'
+  | 'decision'
+  | 'multiple-choice'
+  | 'code-reading'
+  | 'find-the-bug'
+  | 'architecture'
+  | 'interview'
+  | 'speaking'
+  | 'written'
+  | 'challenge';
+
+/**
+ * How the user answers. This is the one switch that decides whether a
+ * microphone is offered at all: recording is a tool for spoken practice, not
+ * the toll booth in front of every piece of knowledge.
+ */
+export type ResponseMode = 'read' | 'select' | 'write' | 'speak';
+
 export interface Category {
   id: string;
   label: LocalizedText;
@@ -210,6 +238,15 @@ export interface RelatedBlock extends BaseBlock {
   contentIds: string[];
 }
 
+/**
+ * How good an option actually is.
+ *
+ * Engineering interviews are rarely right/wrong. `partial` is the important
+ * one: something a competent developer would really say, that misses a
+ * constraint or only holds in a narrower context.
+ */
+export type OptionQuality = 'incorrect' | 'partial' | 'ideal';
+
 export interface ChoicesBlock extends BaseBlock {
   kind: 'choices';
   multiple: boolean;
@@ -217,7 +254,48 @@ export interface ChoicesBlock extends BaseBlock {
     id: string;
     label: LocalizedText;
     correct: boolean;
+    /** Defaults to `correct ? 'ideal' : 'incorrect'` when an author omits it. */
+    quality?: OptionQuality;
     why: LocalizedText;
+  }>;
+}
+
+/**
+ * A short run of yes/no statements, asked right after the material.
+ *
+ * Every answer is explained, including the right ones: a bare tick teaches
+ * nothing, and a user who guessed correctly still needs the reason.
+ */
+export interface QuickCheckBlock extends BaseBlock {
+  kind: 'quick-check';
+  questions: Array<{
+    id: string;
+    statement: LocalizedText;
+    /** The true answer to the statement as written. */
+    answer: boolean;
+    why: LocalizedText;
+  }>;
+}
+
+/**
+ * Decisions, one card at a time — swipe or press.
+ *
+ * Each card is a sentence a real developer could say in a real review. No
+ * strawmen: if the wrong call is obviously stupid, nothing was tested.
+ */
+export interface DecisionBlock extends BaseBlock {
+  kind: 'decision';
+  cards: Array<{
+    id: string;
+    statement: LocalizedText;
+    /** What an experienced engineer would do, given the stated context. */
+    expected: 'agree' | 'disagree';
+    /** One line naming the call, shown before the reasoning. */
+    verdict: LocalizedText;
+    why: LocalizedText;
+    /** When the other call is defensible. Omitted when it never is. */
+    context?: LocalizedText;
+    tradeOff?: LocalizedText;
   }>;
 }
 
@@ -294,6 +372,8 @@ export type Block =
   | FollowUpBlock
   | RelatedBlock
   | ChoicesBlock
+  | QuickCheckBlock
+  | DecisionBlock
   | CompareBlock
   | VideoBlock
   | LinkBlock
@@ -310,6 +390,14 @@ export interface Content {
   id: string;
   slug: string;
   type: ContentTypeId;
+  /**
+   * The work this item asks for. Optional in the data: `activityKindOf`
+   * derives it from the blocks and the type when an author leaves it out, so
+   * the whole bank gained activity kinds without being rewritten.
+   */
+  activityKind?: ActivityKind;
+  /** Overrides the response mode the activity kind would imply. */
+  responseMode?: ResponseMode;
   status: 'draft' | 'published';
 
   title: LocalizedText;
@@ -339,6 +427,8 @@ export interface Content {
   blocks: Block[];
   relatedContentIds: string[];
   followUpContentIds?: string[];
+  /** Items worth meeting first. Used to order a path, never to lock a door. */
+  prerequisiteIds?: string[];
 
   createdAt: string;
   updatedAt: string;
@@ -377,7 +467,27 @@ export interface ContentProgress {
   spokenMs: number;
 }
 
-export type AttemptMode = 'spoken' | 'silent' | 'selection';
+export type AttemptMode = 'spoken' | 'silent' | 'selection' | 'written';
+
+/**
+ * A learning path: one subject, taught in order.
+ *
+ * The steps are ordinary content items — a path is an itinerary through the
+ * bank, not a second kind of content. That is what keeps a step reusable in
+ * Today's Practice without being authored twice.
+ */
+export interface LearningPath {
+  id: string;
+  slug: string;
+  title: LocalizedText;
+  /** One line: what you will be able to answer when you finish. */
+  summary: LocalizedText;
+  categoryId: string;
+  stackIds: string[];
+  difficulty: DifficultyId;
+  /** Content ids, in teaching order. */
+  stepIds: string[];
+}
 
 export interface Attempt {
   id: string;
@@ -389,6 +499,8 @@ export interface Attempt {
   durationMs: number;
   recordingId: string | null;
   confidence: Confidence | null;
+  /** The typed answer, when the user answered in writing. */
+  writtenAnswer?: string;
   revealed: boolean;
   /** Marked as the take worth keeping, the way a studio circles a take. */
   starred: boolean;

@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { LuLock, LuLockOpen, LuStar, LuTriangleAlert } from 'react-icons/lu';
-import type { Attempt, Confidence, Content, Locale } from '@/domain/types';
-import { CONTENT_TYPES, DIFFICULTIES, STACKS } from '@/data/seed/taxonomy';
+import type { Attempt, Confidence, Content, Locale, ResponseMode } from '@/domain/types';
+import { DIFFICULTIES, STACKS } from '@/data/seed/taxonomy';
+import { activityKindOf, responseModeOf } from '@/domain/activity';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
 import { Legend, Panel, PanelRule } from '@/components/lab/Panel';
@@ -10,6 +11,8 @@ import { TransportButton } from '@/components/lab/Transport';
 import { Tag } from '@/components/ui/States';
 import { BlockRenderer, type BlockContext } from './blocks';
 import { RecordingDeck } from './RecordingDeck';
+import { WrittenDeck } from './WrittenDeck';
+import { ActivityChip, activityWhatKey } from './ActivityChip';
 import type { RecordedTake } from '@/hooks/useRecorder';
 
 /**
@@ -49,6 +52,9 @@ export interface ContentRendererProps {
   /** Keeps the user inside a session instead of offering ways out. */
   hideRelated?: boolean;
   onChoice?: (correct: boolean) => void;
+  /** Fired when a selection activity finishes, with how many answers landed. */
+  onResult?: (result: { right: number; total: number }) => void;
+  onSaveWritten?: (answer: string) => Promise<void>;
   autoFocusRecord?: boolean;
 }
 
@@ -73,11 +79,19 @@ export function ContentRenderer({
   confidenceChoices = ['known', 'partial', 'unknown'],
   hideRelated = false,
   onChoice,
+  onResult,
+  onSaveWritten,
   autoFocusRecord = false,
 }: ContentRendererProps) {
   const { t, text, isFallback } = useI18n();
   const [revealed, setRevealed] = useState(false);
   const [gradedAs, setGradedAs] = useState<Confidence | null>(null);
+  /** Set when a selection activity has been answered on this screen. */
+  const [answered, setAnswered] = useState(false);
+  const [writingOpen, setWritingOpen] = useState(false);
+
+  const kind = activityKindOf(content);
+  const mode = responseModeOf(content);
 
   const hasAttempt = gateSince
     ? attempts.some((attempt) => attempt.createdAt >= gateSince)
@@ -96,12 +110,22 @@ export function ContentRenderer({
     [content.blocks],
   );
 
-  const blockContext: BlockContext = useMemo(
-    () => ({ answerLocale, contentById, onNavigate, onChoice }),
-    [answerLocale, contentById, onNavigate, onChoice],
+  const handleResult = useCallback(
+    (result: { right: number; total: number }) => {
+      setAnswered(true);
+      // The activity is over and the app already knows how it went: opening
+      // the answer is the next thing the user wants, not another key to press.
+      setRevealed(true);
+      onResult?.(result);
+    },
+    [onResult],
   );
 
-  const typeDef = CONTENT_TYPES.find((entry) => entry.id === content.type);
+  const blockContext: BlockContext = useMemo(
+    () => ({ answerLocale, contentById, onNavigate, onChoice, onResult: handleResult }),
+    [answerLocale, contentById, onNavigate, onChoice, handleResult],
+  );
+
   const difficulty = DIFFICULTIES.find((entry) => entry.id === content.difficulty);
   const stackLabels = content.stackIds
     .map((id) => STACKS.find((stack) => stack.id === id)?.label)
@@ -119,6 +143,13 @@ export function ContentRenderer({
     },
     [onGrade],
   );
+
+  const writtenAnswer = useMemo(() => {
+    const relevant = attempts
+      .filter((attempt) => attempt.writtenAnswer)
+      .filter((attempt) => (gateSince ? attempt.createdAt >= gateSince : true));
+    return relevant[relevant.length - 1]?.writtenAnswer ?? null;
+  }, [attempts, gateSince]);
 
   const englishOnly = content.languages.length === 1 && content.languages[0] === 'en';
 
@@ -143,11 +174,12 @@ export function ContentRenderer({
           />
         </div>
 
-        {/* One silkscreened line, the same order as every list row. */}
+        {/* One silkscreened line, the same order as every list row. The kind
+            chip leads it: the work comes before the subject matter. */}
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <ActivityChip kind={kind} />
           <span className="legend-type leading-[1.5]">
             {[
-              typeDef ? text(typeDef.label) : null,
               difficulty ? text(difficulty.label) : null,
               ...stackLabels,
               t('content.minutes', { count: content.estimatedMinutes }),
@@ -163,9 +195,7 @@ export function ContentRenderer({
           ) : null}
         </div>
 
-        {typeDef ? (
-          <p className="max-w-read text-body text-legend-3">{text(typeDef.instruction)}</p>
-        ) : null}
+        <p className="max-w-read text-body text-legend-3">{t(activityWhatKey(kind))}</p>
 
         {englishOnly ? (
           <p className="inline-flex items-center gap-2 text-meta text-channel2">
@@ -181,24 +211,53 @@ export function ContentRenderer({
 
       {/* --- the prompt side ------------------------------------------------ */}
       <div className="space-y-6">
-        {promptBlocks.map((block) => (
+        {/* A learn card has no gate: everything it has to say is the point. */}
+        {(mode === 'read' ? content.blocks : promptBlocks).map((block) => (
           <BlockRenderer key={block.id} block={block} context={blockContext} />
         ))}
       </div>
 
-      {/* --- channel one ---------------------------------------------------- */}
-      {content.requiresSpokenAttempt ? (
-        <RecordingDeck
+      {/* --- channel one: how this activity is answered ---------------------- */}
+      {mode === 'speak' ? (
+        <div className="space-y-3">
+          <RecordingDeck
+            attempts={attempts}
+            answerLocale={answerLocale}
+            maxDurationMs={maxRecordingMs}
+            onSaveTake={onSaveTake}
+            onSilentAttempt={onSilentAttempt}
+            onDeleteAttempt={onDeleteAttempt}
+            onToggleStar={onToggleStar}
+            getRecordingUrl={getRecordingUrl}
+            compact={answersSuppressed}
+            autoFocusRecord={autoFocusRecord}
+          />
+
+          {/* Writing is always an equal way through a spoken question: a quiet
+              office should not end the session. */}
+          {onSaveWritten && !writingOpen ? (
+            <TransportButton variant="quiet" size="sm" onClick={() => setWritingOpen(true)}>
+              {t('write.action')}
+            </TransportButton>
+          ) : null}
+          {onSaveWritten && writingOpen ? (
+            <WrittenDeck
+              attempts={attempts}
+              onSaveWritten={onSaveWritten}
+              gateSince={gateSince}
+              compact
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      {mode === 'write' && onSaveWritten ? (
+        <WrittenDeck
           attempts={attempts}
-          answerLocale={answerLocale}
-          maxDurationMs={maxRecordingMs}
-          onSaveTake={onSaveTake}
+          onSaveWritten={onSaveWritten}
           onSilentAttempt={onSilentAttempt}
-          onDeleteAttempt={onDeleteAttempt}
-          onToggleStar={onToggleStar}
-          getRecordingUrl={getRecordingUrl}
+          gateSince={gateSince}
           compact={answersSuppressed}
-          autoFocusRecord={autoFocusRecord}
         />
       ) : null}
 
@@ -211,6 +270,20 @@ export function ContentRenderer({
       ) : revealed ? (
         <>
           <div className="space-y-8">
+            {/* Your answer stays on screen next to ours: comparing is the
+                lesson, and a written answer that scrolls away teaches nothing. */}
+            {writtenAnswer ? (
+              <Panel className="overflow-hidden" role="status" aria-live="polite">
+                <div className="px-4 py-3">
+                  <Legend>{t('write.yours')}</Legend>
+                </div>
+                <PanelRule />
+                <p className="max-w-read whitespace-pre-wrap bg-felt px-4 py-4 text-body leading-relaxed text-legend-2">
+                  {writtenAnswer}
+                </p>
+              </Panel>
+            ) : null}
+
             {answerBlocks.map((block) => (
               <BlockRenderer key={block.id} block={block} context={blockContext} />
             ))}
@@ -231,7 +304,9 @@ export function ContentRenderer({
             ) : null}
           </div>
 
-          {hasAttempt ? (
+          {/* Selection activities are graded by the app, which already knows
+              what was right; learn cards are graded by their own footer. */}
+          {hasAttempt && mode !== 'select' && mode !== 'read' ? (
             <ConfidencePanel gradedAs={gradedAs} onGrade={grade} choices={confidenceChoices} />
           ) : null}
 
@@ -241,9 +316,12 @@ export function ContentRenderer({
             </TransportButton>
           </div>
         </>
-      ) : (
+      ) : mode === 'read' ? (
+        <LearnFooter gradedAs={gradedAs} onGrade={grade} />
+      ) : answerBlocks.length === 0 && mode === 'select' ? null : (
         <ChannelTwoLocked
-          unlocked={hasAttempt || !content.requiresSpokenAttempt}
+          mode={mode}
+          unlocked={hasAttempt || answered}
           onReveal={() => setRevealed(true)}
           onRevealAnyway={revealWithoutAttempt}
           hasFallbackLanguage={isFallback(content.title, answerLocale)}
@@ -261,11 +339,14 @@ export function ContentRenderer({
  * quiet, it says what it costs, and taking it does not advance the schedule.
  */
 function ChannelTwoLocked({
+  mode,
   unlocked,
   onReveal,
   onRevealAnyway,
   hasFallbackLanguage,
 }: {
+  /** Selection activities are gated by answering, not by recording. */
+  mode: ResponseMode;
   unlocked: boolean;
   onReveal: () => void;
   onRevealAnyway: () => Promise<void>;
@@ -284,10 +365,16 @@ function ChannelTwoLocked({
         </span>
         <div className="min-w-0 flex-1">
           <Legend className={cn(!unlocked && 'text-channel2 line-through decoration-channel2/50')}>
-            {t('reveal.locked')}
+            {mode === 'select' ? t('reveal.lockedSelect') : t('reveal.locked')}
           </Legend>
           {!unlocked ? (
-            <p className="mt-1.5 max-w-read text-body text-legend-3">{t('reveal.lockedHelp')}</p>
+            <p className="mt-1.5 max-w-read text-body text-legend-3">
+              {mode === 'select'
+                ? t('reveal.lockedSelectHelp')
+                : mode === 'write'
+                  ? t('reveal.lockedHelpWrite')
+                  : t('reveal.lockedHelp')}
+            </p>
           ) : null}
         </div>
       </div>
@@ -308,7 +395,7 @@ function ChannelTwoLocked({
             )}
             onClick={onReveal}
           >
-            {t('reveal.action')}
+            {mode === 'select' ? t('reveal.actionSelect') : t('reveal.action')}
           </TransportButton>
 
           {hasFallbackLanguage ? (
@@ -318,7 +405,7 @@ function ChannelTwoLocked({
 
         {/* The escape hatch is a footnote, not a peer of the reveal key: it
             exists for a broken microphone, and it says what it costs. */}
-        {!unlocked ? (
+        {!unlocked && mode !== 'select' ? (
           <p className="mt-2.5 max-w-read text-micro leading-relaxed text-legend-3">
             <button
               type="button"
@@ -395,6 +482,53 @@ function ConfidencePanel({
             </button>
           );
         })}
+      </div>
+    </Panel>
+  );
+}
+
+/**
+ * The end of a learn card.
+ *
+ * A learn card is not graded on correctness — nothing was asked. It asks the
+ * only question it can answer honestly: did this land? "Need another pass"
+ * schedules it back sooner instead of pretending it was learned.
+ */
+function LearnFooter({
+  gradedAs,
+  onGrade,
+}: {
+  gradedAs: Confidence | null;
+  onGrade: (confidence: Confidence) => Promise<void>;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <Panel className="overflow-hidden">
+      <div className="px-4 py-3">
+        <Legend>{t('learn.check')}</Legend>
+      </div>
+      <PanelRule />
+      <div className="flex flex-wrap gap-2 bg-felt px-4 py-3">
+        <TransportButton
+          variant={gradedAs === 'known' ? 'neutral' : 'primary'}
+          size="lg"
+          onClick={() => void onGrade('known')}
+          aria-pressed={gradedAs === 'known'}
+        >
+          {t('learn.gotIt')}
+        </TransportButton>
+        <TransportButton
+          variant="neutral"
+          size="lg"
+          onClick={() => void onGrade('partial')}
+          aria-pressed={gradedAs === 'partial'}
+        >
+          {t('learn.again')}
+        </TransportButton>
+        {gradedAs ? (
+          <span className="self-center legend-type text-monitor">{t('learn.marked')}</span>
+        ) : null}
       </div>
     </Panel>
   );

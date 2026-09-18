@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState, useTransition, type ReactNode } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LuActivity,
   LuBookOpen,
@@ -7,7 +7,7 @@ import {
   LuFilePen,
   LuHouse,
   LuLayers,
-  LuMessagesSquare,
+  LuMic,
   LuMoon,
   LuRadio,
   LuSun,
@@ -41,15 +41,26 @@ interface NavItem {
   primary: boolean;
 }
 
+/**
+ * Six destinations, one question each: what should I do now, what can I learn,
+ * what can I practise, what can I answer out loud, how am I doing, and my
+ * settings. Anything that is a library rather than a destination — the bank,
+ * the flashcards, the mock — hangs off the screen it belongs to.
+ */
 const NAV: NavItem[] = [
   { to: '/', key: 'nav.home', icon: <LuHouse />, primary: true },
+  { to: '/learn', key: 'nav.learn', icon: <LuBookOpen />, primary: true },
   { to: '/practice', key: 'nav.practice.today', icon: <LuRadio />, primary: true },
-  { to: '/library', key: 'nav.library', icon: <LuBookOpen />, primary: true },
-  { to: '/flashcards', key: 'nav.flashcards', icon: <LuLayers />, primary: false },
-  { to: '/english', key: 'nav.english', icon: <LuMessagesSquare />, primary: false },
-  { to: '/mock', key: 'nav.mock', icon: <LuTimer />, primary: false },
-  { to: '/progress', key: 'nav.progress', icon: <LuActivity />, primary: true },
+  { to: '/speaking', key: 'nav.speaking', icon: <LuMic />, primary: true },
+  { to: '/progress', key: 'nav.progress', icon: <LuActivity />, primary: false },
   { to: '/profile', key: 'nav.profile', icon: <LuUser />, primary: false },
+];
+
+/** Reachable from the screens above, and from the overflow sheet on a phone. */
+const SECONDARY: NavItem[] = [
+  { to: '/library', key: 'nav.library', icon: <LuLayers />, primary: false },
+  { to: '/flashcards', key: 'nav.flashcards', icon: <LuLayers />, primary: false },
+  { to: '/mock', key: 'nav.mock', icon: <LuTimer />, primary: false },
 ];
 
 /** Tooling rather than study; kept apart from the study destinations. */
@@ -60,7 +71,29 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useSettings();
   const { user, available } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
+  /**
+   * Route chunks load as a transition, so the current screen stays put instead
+   * of flashing a skeleton. The cost is that a tapped key looks dead while the
+   * chunk travels; this is the signal that it is not.
+   */
+  const [navPending, startNavigation] = useTransition();
+
+  const go = (to: string) => (event: React.MouseEvent) => {
+    if (
+      event.defaultPrevented ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    ) {
+      return;
+    }
+    event.preventDefault();
+    startNavigation(() => navigate(to));
+  };
 
 
   // Moving between screens should put the reader at the top of the new one.
@@ -76,7 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const immersive = location.pathname.startsWith('/practice/session');
   // Everything the transport strip cannot hold. Without this, flashcards, the
   // mock interview and the profile were unreachable on a phone.
-  const overflowNav = [...NAV.filter((item) => !item.primary), ...TOOLS];
+  const overflowNav = [...NAV.filter((item) => !item.primary), ...SECONDARY, ...TOOLS];
   const overflowActive = overflowNav.some((item) => location.pathname.startsWith(item.to));
 
   if (immersive) {
@@ -142,6 +175,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             ) : null}
           </div>
         </div>
+
+        {/* A lamp travelling the rail while the next screen is on its way.
+            It sits in the header's own hairline, so nothing moves when it
+            appears. */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label={navPending ? t('common.navigating') : ''}
+          className="relative -mb-px h-px w-full overflow-hidden"
+        >
+          {navPending ? (
+            <span className="absolute inset-y-0 left-0 w-1/4 animate-rail-travel bg-brass" />
+          ) : null}
+        </div>
       </header>
 
       <div className="mx-auto flex w-full max-w-deck flex-1 gap-8 px-4 py-6 lg:py-8">
@@ -155,6 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <li key={item.to}>
                 <NavLink
                   to={item.to}
+                  onClick={go(item.to)}
                   end={item.to === '/'}
                   className={({ isActive }) =>
                     cn(
@@ -188,6 +236,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <li key={item.to}>
                 <NavLink
                   to={item.to}
+                  onClick={go(item.to)}
                   className={({ isActive }) =>
                     cn(
                       'flex items-center gap-3 rounded-control px-3 py-2 text-meta',
@@ -225,6 +274,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
+                    onClick={go(item.to)}
                     className={({ isActive }) =>
                       cn(
                         'flex h-12 items-center gap-3 rounded-control px-3 text-body transition-colors',
@@ -248,6 +298,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <li key={item.to} className="flex-1">
               <NavLink
                 to={item.to}
+                onClick={go(item.to)}
                 end={item.to === '/'}
                 className={({ isActive }) =>
                   cn(

@@ -3,6 +3,7 @@ import {
   LuArrowRight,
   LuCircleAlert,
   LuCircleCheck,
+  LuCircleSlash,
   LuCircleX,
   LuExternalLink,
   LuLightbulb,
@@ -26,6 +27,8 @@ import { Tag } from '@/components/ui/States';
 import { TwoPositionSwitch } from '@/components/lab/Transport';
 import { CodeView } from './CodeView';
 import { Prose, renderInline } from './Prose';
+import { QuickCheck } from './QuickCheck';
+import { Decision } from './Decision';
 
 /**
  * Block components.
@@ -42,6 +45,12 @@ export interface BlockContext {
   onNavigate: (contentId: string) => void;
   /** Fired once when a selection-format item is answered. */
   onChoice?: (correct: boolean) => void;
+  /**
+   * Fired when a multi-question block finishes, with how many landed. A
+   * session grades from this instead of asking the user to grade themselves
+   * on something the app already knows the answer to.
+   */
+  onResult?: (result: { right: number; total: number }) => void;
 }
 
 /** A callout: one icon, one tone, one message. Used for tips and warnings. */
@@ -152,13 +161,22 @@ function Choices({ block, context }: { block: ChoicesBlock; context: BlockContex
   const [chosen, setChosen] = useState<string | null>(null);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" role="group">
       <Legend as="p">{t('block.choices.prompt')}</Legend>
-      <ul className="space-y-2">
+      {/* The explanation is the lesson; a screen reader has to receive it. */}
+      <ul className="space-y-2" aria-live="polite">
         {block.options.map((option) => {
           const isChosen = chosen === option.id;
           const revealed = chosen !== null;
           const correct = option.correct;
+          // Engineering answers are rarely right or wrong. An option that
+          // works but misses a constraint is marked as exactly that.
+          const quality = option.quality ?? (correct ? 'ideal' : 'incorrect');
+          const tone = {
+            ideal: { border: 'border-monitor/50 bg-monitor/[0.07]', ink: 'text-monitor' },
+            partial: { border: 'border-brass/50 bg-brass/[0.07]', ink: 'text-brass' },
+            incorrect: { border: 'border-record/50 bg-record/[0.07]', ink: 'text-record-ink' },
+          }[quality];
 
           return (
             <li key={option.id}>
@@ -167,6 +185,7 @@ function Choices({ block, context }: { block: ChoicesBlock; context: BlockContex
                 onClick={() => {
                   setChosen(option.id);
                   context.onChoice?.(option.correct);
+                  context.onResult?.({ right: option.correct ? 1 : 0, total: 1 });
                 }}
                 disabled={revealed}
                 aria-pressed={isChosen}
@@ -174,21 +193,20 @@ function Choices({ block, context }: { block: ChoicesBlock; context: BlockContex
                   'w-full rounded-panel border px-4 py-3 text-left transition-colors duration-150',
                   'disabled:cursor-default',
                   !revealed && 'border-rule bg-chassis hover:border-legend-3 hover:bg-plate',
-                  revealed && correct && 'border-monitor/50 bg-monitor/[0.07]',
-                  revealed && !correct && isChosen && 'border-record/50 bg-record/[0.07]',
+                  revealed && (correct || isChosen) && tone.border,
                   revealed && !correct && !isChosen && 'border-rule bg-chassis opacity-60',
                 )}
               >
                 <span className="flex items-start gap-2.5">
                   {revealed ? (
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        'mt-0.5 shrink-0 text-[1.1em]',
-                        correct ? 'text-monitor' : 'text-record-ink',
+                    <span aria-hidden="true" className={cn('mt-0.5 shrink-0 text-[1.1em]', tone.ink)}>
+                      {quality === 'ideal' ? (
+                        <LuCircleCheck />
+                      ) : quality === 'partial' ? (
+                        <LuCircleSlash />
+                      ) : (
+                        <LuCircleX />
                       )}
-                    >
-                      {correct ? <LuCircleCheck /> : <LuCircleX />}
                     </span>
                   ) : (
                     <span
@@ -201,13 +219,15 @@ function Choices({ block, context }: { block: ChoicesBlock; context: BlockContex
 
                 {revealed ? (
                   <span className="mt-3 block border-t border-rule/60 pt-3">
-                    <span
-                      className={cn(
-                        'legend-type mb-1.5 block',
-                        correct ? 'text-monitor' : 'text-record-ink',
-                      )}
-                    >
-                      {correct ? t('block.choices.correct') : t('block.choices.incorrect')}
+                    <span className="mb-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <span className={cn('legend-type', tone.ink)}>
+                        {t(`feedback.quality.${quality}`)}
+                      </span>
+                      {/* Grading four options without saying which was yours
+                          loses the answer the user actually gave. */}
+                      {isChosen ? (
+                        <span className="legend-type text-legend-2">{t('feedback.yourPick')}</span>
+                      ) : null}
                     </span>
                     <Prose text={text(option.why, context.answerLocale)} />
                   </span>
@@ -625,6 +645,16 @@ export function BlockRenderer({ block, context }: { block: Block; context: Block
 
     case 'related':
       return <RelatedContent contentIds={block.contentIds} context={context} />;
+
+    case 'quick-check':
+      return (
+        <QuickCheck block={block} answerLocale={context.answerLocale} onResult={context.onResult} />
+      );
+
+    case 'decision':
+      return (
+        <Decision block={block} answerLocale={context.answerLocale} onResult={context.onResult} />
+      );
 
     case 'choices':
       return <Choices block={block} context={context} />;

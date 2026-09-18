@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LuArrowRight, LuFlame, LuLock, LuMic, LuTriangleAlert } from 'react-icons/lu';
-import type { Content } from '@/domain/types';
+import { LuArrowRight, LuFlame, LuMic } from 'react-icons/lu';
 import { CATEGORIES, SKILLS } from '@/data/seed/taxonomy';
+import { LEARNING_PATHS } from '@/data/seed/paths';
 import {
   computeSkillLevels,
   computeStreak,
@@ -10,18 +10,20 @@ import {
   dueContent,
   stateOf,
 } from '@/domain/selectors';
+import { pathProgress, recommendPath } from '@/domain/paths';
+import { activityKindOf, isSpokenActivity } from '@/domain/activity';
 import { sessionProgress, summariseSession, type PracticeSize } from '@/domain/practice';
 import { useStudy } from '@/app/providers/StudyProvider';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useI18n } from '@/i18n';
 import { formatTotalTime } from '@/lib/utils';
 import { Panel, PanelHeader, PanelRule } from '@/components/lab/Panel';
-import { ChannelStrip, LevelMeter } from '@/components/lab/Meters';
+import { ChannelStrip } from '@/components/lab/Meters';
 import { Lamp } from '@/components/lab/Lamp';
 import { TransportButton } from '@/components/lab/Transport';
-import { BoothLoading } from '@/components/ui/States';
-import { renderInline } from '@/features/content/blocks/Prose';
+import { InlineSpinner, PageSkeleton } from '@/components/ui/States';
 import { PlanMeta, SessionRail, WhyTheseActivities } from '@/features/practice/PracticeParts';
+import { ActivityChip } from '@/features/content/ActivityChip';
 
 /**
  * The skills shown before there is any evidence. At zero, with their lamps
@@ -38,29 +40,18 @@ const DEFAULT_MONITORS = [
 ];
 
 /**
- * The question as the interviewer would ask it.
+ * Home.
  *
- * A prompt that only makes sense next to its code ("what does this print?")
- * falls back to the title, which carries the subject on its own.
- */
-function deckQuestion(content: Content, text: (value: Content['title']) => string): string {
-  const hasCode = content.blocks.some((block) => block.phase === 'prompt' && block.kind === 'code');
-  const prompt = content.blocks.find((block) => block.kind === 'prompt');
-  if (hasCode || prompt?.kind !== 'prompt') return text(content.title);
-  return text(prompt.text) || text(content.title);
-}
-
-/**
- * The lab console.
- *
- * Today's Practice is the loaded deck: open the app, press Start, practise.
- * The deck shows exactly one next question and one way to begin, with channel
- * two inert beside it. The user should never have to decide what to study
- * before they can start — that decision is the generator's job, and the
- * "why these activities" line shows its working.
+ * Four things, in the order somebody actually decides between them: carry on
+ * learning something, do today's practice, answer something out loud, or go
+ * looking. Each one says what it is and how long it takes before it is
+ * pressed, and exactly one key on the screen is lit — the one this user should
+ * press now. Everything else is neutral, so the screen recommends instead of
+ * presenting four equal options.
  */
 export function HomePage() {
-  const { ready, index, snapshot, todaySession, practicePreferences, planPractice, startPractice } = useStudy();
+  const { ready, index, snapshot, todaySession, practicePreferences, planPractice, startPractice } =
+    useStudy();
   const { user } = useAuth();
   const { t, text, locale } = useI18n();
   const navigate = useNavigate();
@@ -73,7 +64,20 @@ export function HomePage() {
 
   const goal = practicePreferences.dailyGoal;
   const goalPlan = useMemo(() => planPractice(goal), [planPractice, goal]);
-  const quickPlan = useMemo(() => planPractice(5), [planPractice]);
+
+  const paths = useMemo(
+    () => LEARNING_PATHS.map((path) => pathProgress(path, index.byId, snapshot.progress)),
+    [index.byId, snapshot.progress],
+  );
+  const featuredPath = useMemo(() => recommendPath(paths), [paths]);
+
+  const speakingWaiting = useMemo(() => {
+    const spoken = index.content.filter(isSpokenActivity);
+    const attempted = new Set(
+      snapshot.attempts.filter((a) => a.mode === 'spoken').map((a) => a.contentId),
+    );
+    return spoken.filter((item) => !attempted.has(item.id)).length;
+  }, [index.content, snapshot.attempts]);
 
   const monitorBank = useMemo(() => {
     const practised = levels
@@ -88,12 +92,10 @@ export function HomePage() {
       dueCount: 0,
       lastPracticedAt: null,
     }));
-    // With no evidence yet, four silent strips say what gets measured without
-    // letting a column of zeros outweigh the deck.
     return [...practised, ...silent].slice(0, practised.length > 0 ? 6 : 4);
   }, [levels]);
 
-  if (!ready) return <BoothLoading label={t('common.loading')} />;
+  if (!ready) return <PageSkeleton label={t('common.loading')} rows={3} />;
 
   const hour = new Date().getHours();
   const greeting =
@@ -105,16 +107,23 @@ export function HomePage() {
   const name = snapshot.profile?.displayName || user?.displayName?.split(' ')[0] || '';
 
   const progress = todaySession ? sessionProgress(todaySession, index.byId) : null;
-  const inProgress = Boolean(todaySession && progress && !progress.complete && !todaySession.endedEarly);
-  const finishedToday = Boolean(todaySession && progress && (progress.complete || todaySession.endedEarly));
-  const showQuick = !inProgress && (goal !== 5 || finishedToday) && quickPlan.length > 0;
+  const inProgress = Boolean(
+    todaySession && progress && !progress.complete && !todaySession.endedEarly,
+  );
+  const finishedToday = Boolean(
+    todaySession && progress && (progress.complete || todaySession.endedEarly),
+  );
 
-  const nextItem = inProgress ? todaySession?.items.find((item) => item.status === 'pending') : undefined;
-  const upNext: Content | undefined = inProgress
-    ? nextItem && index.byId.get(nextItem.contentId)
-    : finishedToday
-      ? undefined
-      : goalPlan[0]?.content;
+  /**
+   * One lit key per screen. A session left half-finished outranks everything;
+   * after that, a path in the middle; otherwise today's practice.
+   */
+  const lit: 'practice' | 'path' =
+    inProgress || finishedToday
+      ? 'practice'
+      : featuredPath && featuredPath.started && !featuredPath.complete
+        ? 'path'
+        : 'practice';
 
   const start = async (size: PracticeSize) => {
     setStarting(true);
@@ -125,221 +134,302 @@ export function HomePage() {
     }
   };
 
-  const whyPlan = inProgress && todaySession
-    ? todaySession.items
-        .map((item) => {
-          const content = index.byId.get(item.contentId);
-          return content ? { content, reason: item.reason } : null;
-        })
-        .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
-    : goalPlan;
+  const whyPlan =
+    inProgress && todaySession
+      ? todaySession.items
+          .map((item) => {
+            const content = index.byId.get(item.contentId);
+            return content ? { content, reason: item.reason } : null;
+          })
+          .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+      : goalPlan;
+
+  /** The activity this session will actually put on screen first. */
+  const practiceOpener = inProgress
+    ? index.byId.get(todaySession?.items.find((item) => item.status === 'pending')?.contentId ?? '')
+    : goalPlan[0]?.content;
 
   const summary = finishedToday && todaySession ? summariseSession(todaySession, index.byId) : null;
 
-  return (
-    <div className={`grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] ${showQuick ? 'xl:grid-rows-[auto_auto_auto_1fr]' : 'xl:grid-rows-[auto_auto_1fr]'}`}>
-      {/* --- today's practice: the loaded deck ------------------------------ */}
-      <div className="min-w-0 space-y-3 xl:col-start-1 xl:row-start-1">
-        <p className="flex flex-wrap items-center gap-x-1.5 text-meta text-legend-3">
-          <span className="text-legend-2">
-            {greeting}
-            {name ? `, ${name}` : ''}
-          </span>
+  const greetingLine = (
+    <p className="flex flex-wrap items-center gap-x-1.5 text-meta text-legend-3">
+      <span className="text-legend-2">
+        {greeting}
+        {name ? `, ${name}` : ''}
+      </span>
+      <span aria-hidden="true">·</span>
+      {streak > 0 ? (
+        <span className="inline-flex items-center gap-1 text-legend-2">
+          <LuFlame aria-hidden="true" className="text-legend-3" />
+          {t(streak === 1 ? 'home.streak.day' : 'home.streak.days', {
+            count: streak,
+          })}
+        </span>
+      ) : (
+        <span>{t('home.streak.none')}</span>
+      )}
+      {totals.spokenMs > 0 ? (
+        <>
           <span aria-hidden="true">·</span>
-          {streak > 0 ? (
-            <span className="inline-flex items-center gap-1 text-legend-2">
-              <LuFlame aria-hidden="true" className="text-legend-3" />
-              {t(streak === 1 ? 'home.streak.day' : 'home.streak.days', { count: streak })}
+          <span>{formatTotalTime(totals.spokenMs, locale)}</span>
+        </>
+      ) : null}
+    </p>
+  );
+
+  const learnPanel = featuredPath ? (
+    <Panel className="overflow-hidden" aria-labelledby="home-learn">
+      <PanelHeader
+        legend={featuredPath.started ? t('home.section.learn') : t('home.learn.startTitle')}
+        headingId="home-learn"
+        actions={
+          <span className="legend-type" data-tabular>
+            {featuredPath.complete
+              ? t('path.done')
+              : t('path.stepOf', {
+                  current: featuredPath.position,
+                  total: featuredPath.total,
+                })}
+          </span>
+        }
+      />
+      <SessionRail
+        className="mx-4"
+        label={text(featuredPath.path.title)}
+        items={featuredPath.steps.map((step) => ({
+          status: step.done ? 'done' : 'pending',
+        }))}
+        position={featuredPath.position - 1}
+      />
+
+      <div className="px-4 pb-5 pt-4">
+        <HomeTitle lit={lit === 'path'}>{text(featuredPath.path.title)}</HomeTitle>
+        <p className="mt-2 max-w-read text-body text-legend-3">
+          {featuredPath.started ? text(featuredPath.path.summary) : t('home.learn.startBody')}
+        </p>
+        {featuredPath.next ? (
+          <p className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <ActivityChip kind={activityKindOf(featuredPath.next)} />
+            <span className="text-body text-legend-2">{text(featuredPath.next.title)}</span>
+          </p>
+        ) : null}
+      </div>
+
+      <PanelRule />
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 bg-felt px-4 py-3">
+        <TransportButton
+          variant={lit === 'path' ? 'primary' : 'neutral'}
+          size="lg"
+          icon={lit === 'path' ? undefined : <LuArrowRight />}
+          onClick={() =>
+            navigate(
+              featuredPath.next
+                ? `/content/${featuredPath.next.slug}`
+                : `/learn/${featuredPath.path.slug}`,
+            )
+          }
+        >
+          {featuredPath.complete
+            ? t('path.restart')
+            : featuredPath.started
+              ? t('action.continue')
+              : t('path.start')}
+        </TransportButton>
+        <span className="legend-type" data-tabular>
+          {t('path.remaining', { count: featuredPath.minutesLeft })}
+        </span>
+        <Link
+          to="/learn"
+          className="ml-auto rounded-[2px] text-meta text-legend-3 underline decoration-rule-strong underline-offset-2 transition-colors hover:text-legend-2"
+        >
+          {t('nav.learn')}
+        </Link>
+      </div>
+    </Panel>
+  ) : null;
+
+  const practicePanel = (
+    <Panel className="overflow-hidden" aria-labelledby="practice-heading">
+      <PanelHeader
+        legend={finishedToday ? t('practice.done.title') : t('home.section.practice')}
+        headingId="practice-heading"
+        actions={
+          inProgress && progress ? (
+            <span data-tabular className="font-mono text-meta tabular-nums text-legend-2">
+              {t('practice.progress', {
+                done: progress.done,
+                total: progress.total,
+              })}
+            </span>
+          ) : finishedToday && progress ? (
+            <span data-tabular className="font-mono text-meta tabular-nums text-legend-2">
+              {progress.done} / {progress.total}
             </span>
           ) : (
-            <span>{t('home.streak.none')}</span>
-          )}
-          {totals.spokenMs > 0 ? (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{formatTotalTime(totals.spokenMs, locale)}</span>
-            </>
-          ) : null}
+            <PlanMeta contents={goalPlan.map((entry) => entry.content)} size={goalPlan.length} />
+          )
+        }
+      />
+
+      {todaySession ? (
+        <div className="px-4 pb-1">
+          <SessionRail
+            items={todaySession.items}
+            label={t('practice.progress', {
+              done: progress?.done ?? 0,
+              total: progress?.total ?? 0,
+            })}
+          />
+        </div>
+      ) : null}
+
+      <div className="px-4 pb-5 pt-4">
+        {/* The heading names what this session actually opens with, not the
+            panel it sits in: a heading that repeats its own legend says
+            nothing twice. */}
+        <HomeTitle lit={lit === 'practice'}>
+          {finishedToday
+            ? t('practice.done.title')
+            : practiceOpener
+              ? text(practiceOpener.title)
+              : t('home.section.practice')}
+        </HomeTitle>
+        <p className="mt-2 max-w-read text-body text-legend-2">
+          {finishedToday && summary
+            ? `${t('practice.progress', { done: summary.completed, total: summary.total })} · ${t('practice.summary.knew')} ${summary.knew}`
+            : inProgress && progress
+              ? t('practice.remaining', { minutes: progress.remainingMinutes })
+              : t('practice.subtitle')}
         </p>
 
-        <Panel className="overflow-hidden" aria-labelledby="practice-heading">
-          <PanelHeader
-            legend={finishedToday ? t('practice.done.title') : t('practice.title')}
-            headingId="practice-heading"
-            actions={
-              inProgress && progress ? (
-                <span data-tabular className="font-mono text-meta tabular-nums text-legend-2">
-                  {t('practice.progress', { done: progress.done, total: progress.total })}
-                </span>
-              ) : finishedToday && progress ? (
-                <span data-tabular className="font-mono text-meta tabular-nums text-legend-2">
-                  {progress.done} / {progress.total}
-                </span>
-              ) : (
-                <PlanMeta contents={goalPlan.map((entry) => entry.content)} size={goalPlan.length} />
-              )
-            }
-          />
-
-          {todaySession ? (
-            <div className="px-4 pb-1">
-              <SessionRail
-                items={todaySession.items}
-                label={t('practice.progress', { done: progress?.done ?? 0, total: progress?.total ?? 0 })}
-              />
-            </div>
-          ) : null}
-
-          {upNext ? (
-            <div className="px-4 pb-5 pt-4">
-              <h1 className="max-w-read text-prompt font-medium leading-snug text-legend sm:text-prompt-lg">
-                {renderInline(deckQuestion(upNext, text))}
-              </h1>
-              <p className="legend-type mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 leading-[1.5]">
-                <span>
-                  {[
-                    text(CATEGORIES.find((c) => c.id === upNext.categoryId)?.label),
-                    t(`difficulty.${upNext.difficulty}`),
-                  ].join(' · ')}
-                </span>
-                {upNext.isTrap ? (
-                  <span className="inline-flex items-center gap-1">
-                    · <LuTriangleAlert aria-hidden="true" />
-                    {t('content.trap')}
-                  </span>
-                ) : null}
-              </p>
-            </div>
-          ) : summary ? (
-            <div className="px-4 pb-5 pt-4">
-              <p className="text-body text-legend-2">
-                {t('practice.progress', { done: summary.completed, total: summary.total })} ·{' '}
-                {t('practice.summary.knew')} {summary.knew} · {t('practice.summary.recordings')} {summary.recordings}
-              </p>
-            </div>
-          ) : (
-            <p className="px-4 py-5 text-body text-legend-3">{t('practice.empty')}</p>
-          )}
-
-          {/* The transport row: one key, and channel two inert beside it. */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-rule bg-felt px-4 py-3">
-            {finishedToday && todaySession ? (
-              <TransportButton
-                variant="neutral"
-                size="lg"
-                icon={<LuArrowRight />}
-                onClick={() => navigate(`/practice/session?id=${todaySession.id}`)}
-              >
-                {t('practice.done.seeSummary')}
-              </TransportButton>
-            ) : (
-              <TransportButton
-                variant="record"
-                size="lg"
-                icon={<LuMic />}
-                disabled={starting || (!inProgress && goalPlan.length === 0)}
-                onClick={() => (inProgress ? navigate('/practice/session') : void start(goal))}
-              >
-                {inProgress ? t('practice.continue') : t('practice.start')}
-              </TransportButton>
-            )}
-
-            {inProgress && progress ? (
-              <span className="text-meta text-legend-3">
-                {t('practice.remaining', { minutes: progress.remainingMinutes })}
-              </span>
-            ) : !finishedToday ? (
-              <span className="flex min-w-[12rem] flex-1 flex-col gap-1.5" title={t('home.channel2.help')}>
-                <span className="inline-flex items-center gap-2">
-                  <LuLock aria-hidden="true" className="shrink-0 text-channel2" />
-                  <span className="legend-type whitespace-nowrap text-channel2 line-through decoration-channel2/50">
-                    {t('home.channel2')}
-                  </span>
-                </span>
-                <LevelMeter value={0} tone="channel2" label={t('home.channel2.help')} />
-              </span>
-            ) : null}
+        {/* The mix, before anything is pressed: a session is never ten of
+                the same thing, and the chips are how that is visible. */}
+        {!finishedToday && goalPlan.length > 0 && !inProgress ? (
+          <div className="mt-3.5 flex flex-wrap gap-1.5">
+            {[...new Set(goalPlan.map((entry) => activityKindOf(entry.content)))]
+              .slice(0, 6)
+              .map((kind) => (
+                <ActivityChip key={kind} kind={kind} />
+              ))}
           </div>
+        ) : null}
+      </div>
 
-          {!finishedToday && whyPlan.length > 0 ? (
-            <div className="border-t border-rule px-4 py-3">
-              <WhyTheseActivities plan={whyPlan} />
-            </div>
-          ) : null}
+      <PanelRule />
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 bg-felt px-4 py-3">
+        {finishedToday && todaySession ? (
+          <TransportButton
+            variant="neutral"
+            size="lg"
+            icon={<LuArrowRight />}
+            onClick={() => navigate(`/practice/session?id=${todaySession.id}`)}
+          >
+            {t('practice.done.seeSummary')}
+          </TransportButton>
+        ) : (
+          <TransportButton
+            variant={lit === 'practice' ? 'primary' : 'neutral'}
+            size="lg"
+            icon={lit === 'practice' ? undefined : <LuArrowRight />}
+            disabled={starting || (!inProgress && goalPlan.length === 0)}
+            onClick={() => (inProgress ? navigate('/practice/session') : void start(goal))}
+          >
+            {inProgress ? t('practice.continue') : t('practice.start')}
+          </TransportButton>
+        )}
+        {starting ? <InlineSpinner label={t('loading.practice')} /> : null}
+        <Link
+          to="/practice"
+          className="ml-auto rounded-[2px] text-meta text-legend-3 underline decoration-rule-strong underline-offset-2 transition-colors hover:text-legend-2"
+        >
+          {t('practice.sessions')}
+        </Link>
+      </div>
+
+      {!finishedToday && whyPlan.length > 0 ? (
+        <div className="border-t border-rule px-4 py-3">
+          <WhyTheseActivities plan={whyPlan} />
+        </div>
+      ) : null}
+    </Panel>
+  );
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="min-w-0 space-y-6 xl:col-start-1">
+        {greetingLine}
+
+        {/* The lit key and the biggest type belong to the same section: the
+            page recommends one thing rather than presenting four. */}
+        {lit === 'practice' ? (
+          <>
+            {practicePanel}
+            {learnPanel}
+          </>
+        ) : (
+          <>
+            {learnPanel}
+            {practicePanel}
+          </>
+        )}
+
+        {/* --- speaking practice ------------------------------------------- */}
+        <Panel className="overflow-hidden" aria-labelledby="home-speaking">
+          <PanelHeader legend={t('home.section.speaking')} headingId="home-speaking" />
+          <PanelRule />
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-4">
+            <span className="min-w-0 flex-1">
+              <span className="block text-body text-legend-2">{t('speaking.homeBody')}</span>
+              <span className="legend-type mt-1.5 block" data-tabular>
+                {t('speaking.waiting', { count: speakingWaiting })}
+              </span>
+            </span>
+            <TransportButton
+              variant="neutral"
+              icon={<LuMic />}
+              onClick={() => navigate('/speaking')}
+            >
+              {t('nav.speaking')}
+            </TransportButton>
+          </div>
+        </Panel>
+
+        {/* --- 4. explore --------------------------------------------------- */}
+        <Panel className="overflow-hidden" aria-labelledby="subjects-heading">
+          <PanelHeader legend={t('home.section.explore')} headingId="subjects-heading" />
+          <PanelRule />
+          <ul>
+            {CATEGORIES.map((category) => {
+              const items = index.content.filter((item) => item.categoryId === category.id);
+              if (items.length === 0) return null;
+              const practised = items.some((item) => stateOf(index, item.id) !== 'new');
+              return (
+                <li key={category.id}>
+                  <Link
+                    to={`/library?category=${category.id}`}
+                    className="group flex items-center gap-3 border-t border-rule/60 px-4 py-2.5 transition-colors duration-150 first:border-t-0 hover:bg-plate"
+                  >
+                    <Lamp tone={practised ? 'monitor' : 'off'} />
+                    <span className="shrink-0 text-body text-legend">{text(category.label)}</span>
+                    <span className="hidden min-w-0 flex-1 truncate text-meta text-legend-3 sm:block">
+                      {text(category.blurb)}
+                    </span>
+                    <span
+                      data-tabular
+                      className="ml-auto shrink-0 font-mono text-meta tabular-nums text-legend-3"
+                    >
+                      {items.length}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </Panel>
       </div>
 
-      {/* --- got five minutes? ----------------------------------------------- */}
-      {showQuick ? (
-        <Panel className="min-w-0 xl:col-start-1 xl:row-start-2">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-            <span className="min-w-0 flex-1">
-              <span className="block text-body font-medium text-legend">{t('practice.quick.title')}</span>
-              <span className="mt-0.5 block">
-                <PlanMeta contents={quickPlan.map((entry) => entry.content)} size={quickPlan.length} />
-              </span>
-            </span>
-            <TransportButton variant="neutral" disabled={starting} onClick={() => void start(5)}>
-              {t('practice.start')}
-            </TransportButton>
-          </div>
-        </Panel>
-      ) : null}
-
-      {/* --- today's take sheet ------------------------------------------- */}
-      <Panel className={`min-w-0 overflow-hidden xl:col-start-1 ${showQuick ? 'xl:row-start-3' : 'xl:row-start-2'}`} aria-labelledby="queue-heading">
-        <PanelHeader
-          legend={t('home.queue.title')}
-          headingId="queue-heading"
-          actions={
-            due.length > 0 ? (
-              <span className="legend-type" data-tabular>
-                {t('home.queue.count', { count: due.length })}
-              </span>
-            ) : undefined
-          }
-        />
-        <PanelRule />
-
-        {due.length === 0 ? (
-          <p className="px-4 py-5 text-body text-legend-3">{t('home.queue.empty')}</p>
-        ) : (
-          <ul>
-            {due.slice(0, 5).map((item) => (
-              <li key={item.id}>
-                <Link
-                  to={`/content/${item.slug}`}
-                  className="group flex items-center gap-3 border-t border-rule/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-plate"
-                >
-                  <Lamp tone="brass" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-body text-legend">{text(item.title)}</span>
-                    <span className="legend-type mt-1 block">
-                      {text(CATEGORIES.find((c) => c.id === item.categoryId)?.label)} ·{' '}
-                      {t(`difficulty.${item.difficulty}`)}
-                    </span>
-                  </span>
-                  <LuArrowRight
-                    aria-hidden="true"
-                    className="shrink-0 text-legend-3 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-legend"
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {due.length > 5 ? (
-          <div className="border-t border-rule bg-felt px-4 py-3">
-            <TransportButton variant="neutral" size="sm" onClick={() => navigate('/flashcards')}>
-              {t('action.seeAll')}
-            </TransportButton>
-          </div>
-        ) : null}
-      </Panel>
-
-      {/* --- the monitor bank: skills plus the counts, as readouts ----------- */}
-      <aside className={`min-w-0 xl:col-start-2 ${showQuick ? 'xl:row-span-4' : 'xl:row-span-3'} xl:row-start-1 xl:self-start`}>
+      {/* --- the monitor bank, with what is due beneath it ------------------- */}
+      <aside className="min-w-0 space-y-6 xl:col-start-2 xl:self-start">
         <Panel className="overflow-hidden" aria-labelledby="monitor-heading">
           <PanelHeader legend={t('home.monitor.title')} headingId="monitor-heading" />
           <PanelRule />
@@ -392,41 +482,73 @@ export function HomePage() {
             </TransportButton>
           </div>
         </Panel>
-      </aside>
 
-      {/* --- subjects: a selector, not a grid of cards --------------------- */}
-      <Panel className={`min-w-0 self-start overflow-hidden xl:col-start-1 ${showQuick ? 'xl:row-start-4' : 'xl:row-start-3'}`} aria-labelledby="subjects-heading">
-        <PanelHeader legend={t('home.subjects')} headingId="subjects-heading" />
-        <PanelRule />
-        <ul>
-          {CATEGORIES.map((category) => {
-            const items = index.content.filter((item) => item.categoryId === category.id);
-            if (items.length === 0) return null;
-            const practised = items.some((item) => stateOf(index, item.id) !== 'new');
-            return (
-              <li key={category.id}>
-                <Link
-                  to={`/library?category=${category.id}`}
-                  className="group flex items-center gap-3 border-t border-rule/60 px-4 py-2.5 transition-colors duration-150 first:border-t-0 hover:bg-plate"
-                >
-                  <Lamp tone={practised ? 'monitor' : 'off'} />
-                  <span className="shrink-0 text-body text-legend">{text(category.label)}</span>
-                  <span className="hidden min-w-0 flex-1 truncate text-meta text-legend-3 sm:block">
-                    {text(category.blurb)}
-                  </span>
-                  <span
-                    data-tabular
-                    className="ml-auto shrink-0 font-mono text-meta tabular-nums text-legend-3"
+        <Panel className="overflow-hidden" aria-labelledby="queue-heading">
+          <PanelHeader
+            legend={t('home.queue.title')}
+            headingId="queue-heading"
+            actions={
+              due.length > 0 ? (
+                <span className="legend-type" data-tabular>
+                  {t('home.queue.count', { count: due.length })}
+                </span>
+              ) : undefined
+            }
+          />
+          <PanelRule />
+
+          {due.length === 0 ? (
+            <p className="px-4 py-4 text-meta text-legend-3">{t('home.queue.empty')}</p>
+          ) : (
+            <ul>
+              {due.slice(0, 5).map((item) => (
+                <li key={item.id}>
+                  <Link
+                    to={`/content/${item.slug}`}
+                    className="group flex items-center gap-3 border-t border-rule/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-plate"
                   >
-                    {items.length}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </Panel>
-
+                    <Lamp tone="brass" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-body text-legend">
+                        {text(item.title)}
+                      </span>
+                      <span className="legend-type mt-1 block">
+                        {t(`difficulty.${item.difficulty}`)}
+                      </span>
+                    </span>
+                    <LuArrowRight
+                      aria-hidden="true"
+                      className="shrink-0 text-legend-3 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-legend"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </aside>
     </div>
+  );
+}
+
+/**
+ * A section heading on Home.
+ *
+ * The recommended section gets prompt scale; the alternatives below it get
+ * body scale. Size is how the page ranks them, and it always agrees with
+ * which key is lit.
+ */
+function HomeTitle({ lit, children }: { lit: boolean; children: ReactNode }) {
+  const Tag = lit ? 'h1' : 'h2';
+  return (
+    <Tag
+      className={
+        lit
+          ? 'max-w-read text-prompt font-medium leading-snug text-legend sm:text-prompt-lg'
+          : 'max-w-read text-body-lg font-medium text-legend'
+      }
+    >
+      {children}
+    </Tag>
   );
 }

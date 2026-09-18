@@ -37,6 +37,7 @@ import { Mark } from '@/components/brand/Wordmark';
 import { ContentRenderer } from '@/features/content/ContentRenderer';
 import type { RecordedTake } from '@/hooks/useRecorder';
 import { SessionRail, sessionName } from './PracticeParts';
+import { responseModeOf } from '@/domain/activity';
 
 /**
  * Practice mode.
@@ -307,7 +308,7 @@ function SessionRunner({
             gateSince={item.startedAt ?? undefined}
             confidenceChoices={PRACTICE_CONFIDENCE}
             hideRelated
-            autoFocusRecord
+            autoFocusRecord={responseModeOf(content) === 'speak'}
             onSaveTake={async (take: RecordedTake, locale: Locale) => {
               await saveAttempt({
                 contentId: content.id,
@@ -328,7 +329,16 @@ function SessionRunner({
               await grade(content.id, confidence, Boolean(attempt));
               finishItem(confidence, attempt?.mode ?? null, attempt?.durationMs ?? 0, attempt?.id ?? null);
             }}
-            onChoice={async (correct) => {
+            onSaveWritten={async (answer) => {
+              await saveAttempt({
+                contentId: content.id,
+                mode: 'written',
+                locale: answerLocale,
+                durationMs: 0,
+                writtenAnswer: answer,
+              });
+            }}
+            onResult={async ({ right, total }) => {
               if (item.status === 'done') return;
               const attempt = await saveAttempt({
                 contentId: content.id,
@@ -336,7 +346,11 @@ function SessionRunner({
                 locale: answerLocale,
                 durationMs: 0,
               });
-              const confidence: Confidence = correct ? 'known' : 'unknown';
+              // Graded from the answers themselves. Asking somebody to rate
+              // how well they knew something the app just marked would be
+              // theatre, and a worse signal than what they actually answered.
+              const confidence: Confidence =
+                right === total ? 'known' : right * 2 >= total ? 'partial' : 'unknown';
               await grade(content.id, confidence, true);
               finishItem(confidence, 'selection', 0, attempt.id);
             }}

@@ -100,11 +100,17 @@ export default {
           '0%': { transform: 'scaleY(0.82)', opacity: '0' },
           '100%': { transform: 'scaleY(1)', opacity: '1' },
         },
+        // The transport lamp travelling while a screen is on its way.
+        'rail-travel': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
       },
       animation: {
         'lamp-roll': 'lamp-roll 1.6s ease-in-out infinite',
         'needle-settle': 'needle-settle 240ms cubic-bezier(0.22, 1, 0.36, 1) both',
         'tape-engage': 'tape-engage 260ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'rail-travel': 'rail-travel 900ms cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

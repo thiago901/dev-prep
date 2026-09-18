@@ -6,6 +6,7 @@ import { ARCHITECTURE_CONTENT } from './content/architecture';
 import { SECURITY_CONTENT } from './content/security';
 import { BEHAVIORAL_CONTENT } from './content/behavioral';
 import { ENGLISH_CONTENT } from './content/english';
+import { LADDER_CONTENT } from './content/ladder';
 
 /**
  * The seed content bank.
@@ -23,6 +24,7 @@ export const SEED_CONTENT: Content[] = [
   ...SECURITY_CONTENT,
   ...BEHAVIORAL_CONTENT,
   ...ENGLISH_CONTENT,
+  ...LADDER_CONTENT,
 ];
 
 // Fails loudly during development if two items collide on a slug.

@@ -1,4 +1,4 @@
-import type { Confidence, ContentProgress, SrsState } from './types';
+import type { AttemptMode, Confidence, ContentProgress, SrsState } from './types';
 
 /**
  * Review scheduling.
@@ -140,7 +140,7 @@ export function gradeProgress(
 /** Records an attempt without grading it; grading happens after the reveal. */
 export function recordAttempt(
   progress: ContentProgress,
-  mode: 'spoken' | 'silent' | 'selection',
+  mode: AttemptMode,
   durationMs: number,
   now = new Date(),
 ): ContentProgress {
