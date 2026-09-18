@@ -38,6 +38,9 @@ tentativas e gravações (IndexedDB).
 | `npm run check:content` | Valida o banco de conteúdo: ids relacionados, idiomas, blocos, títulos sem markup |
 | `npm run check:practice` | Verifica o gerador do Today's Practice: variedade, sem repetição, revisões e foco |
 | `npm run check:storage` | Regressão: escritas concorrentes no armazenamento local não perdem dados |
+| `npm run check:seed` | Valida o que o seed escreveria no Firestore: ids, referências, tamanho |
+| `npm run seed:all` | Escreve conteúdo, taxonomia, trilhas e fontes no Firestore |
+| `npm run seed:dry` | Mostra o que mudaria, sem escrever nada |
 | `npm run icons` | Regenera os ícones PWA a partir da marca |
 
 ## A escada
@@ -48,8 +51,7 @@ próprios (`src/domain/activity.ts`):
 | Tipo | Como se responde |
 | --- | --- |
 | Aprender | Só leitura, e no fim você diz se ficou claro |
-| Checagem rápida | Sim/não, uma afirmação por vez, cada resposta explicada |
-| Decisão | Arrasta o card ou usa os botões; mostra sua decisão contra a esperada |
+| Decisão | Tomar posição: verdadeiro/falso, sim/não ou faria/não faria. Uma atividade só, com `interactionMode` `binary`, `buttons` ou `swipe` |
 | Múltipla escolha | Alternativas plausíveis, graduadas em ideal / parcial / problema real |
 | Ler código, Achar o bug | Resposta escrita |
 | Arquitetura, Pergunta de entrevista, Prática falada | Resposta falada, com escrita como alternativa |
@@ -69,6 +71,30 @@ O centro do app é uma sessão curta e finita — 5, 10 ou 20 atividades — que
 - **Modo imersivo** (`/practice/session`): sem trilho nem barra de navegação; só progresso, a atividade, pular, próxima atividade e sair. Nada avança sozinho e a sessão termina — sem scroll infinito. Tudo é salvo a cada passo.
 - **Resumo com recomendações honestas:** cada recomendação exige um limite de evidência próprio ("resposta em inglês mais curta que o habitual" só aparece com pelo menos três respostas anteriores para comparar). Sem dados suficientes, a tela diz isso.
 - **Confiança em quatro níveis** (não sabia / sabia parte / sabia / fácil demais) alimenta o mesmo agendamento de revisão e as mesmas habilidades do resto do app.
+
+## Conteúdo no Firestore
+
+O banco de conteúdo mora em `src/data/seed/` e é a fonte que vai para o
+Firestore — não o contrário. O app lê de `content`, `learningPaths`,
+`sources` e `taxonomy` quando há projeto configurado, e cai para o banco
+embutido quando não há, quando as coleções estão vazias ou quando a rede falha.
+
+```bash
+# 1. gere uma chave de serviço no console do Firebase e aponte o .env para ela
+#    GOOGLE_APPLICATION_CREDENTIALS=./serviceAccount.json
+npm run check:seed   # valida ids, referências e tamanho sem tocar na rede
+npm run seed:dry     # mostra o que mudaria
+npm run seed:all     # escreve
+```
+
+O seed é **idempotente**: cada documento tem id estável (`sec-session-storage-learn`,
+`path-escala`, `mdn-cors`), rodar de novo atualiza no lugar, e documentos
+idênticos não são reescritos. Nada é apagado a menos que você passe `--prune`,
+porque um id que sumiu do seed normalmente é uma renomeação em andamento.
+
+Cada afirmação técnica que precisa de respaldo cita uma fonte real
+(`src/data/seed/sources.ts`): documentação oficial, RFC, OWASP, SRE Book. O
+item guarda só o id; a lista de fontes é outra coleção.
 
 ## Ligando o Firebase
 
@@ -121,7 +147,7 @@ interview-tip, warning, tip, example, follow-up, related, choices, compare,
 diagram (nós e arestas, renderizado como SVG nos dois temas), video, link,
 image.
 
-O banco inicial tem **74 itens de nível pleno/sênior** em JavaScript/Node,
+O banco tem **126 itens de nível pleno/sênior** em JavaScript/Node,
 backend, banco de dados, arquitetura, segurança, comportamental e inglês
 técnico — com respostas escritas separadamente em cada idioma, não traduzidas.
 Os itens de inglês técnico existem só em inglês, de propósito.

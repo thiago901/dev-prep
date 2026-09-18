@@ -6,6 +6,11 @@ dist/
 dist-ssr/
 *.local
 
+# service account keys for the Firestore seed — never committed
+serviceAccount*.json
+*service-account*.json
+firebase-adminsdk*.json
+
 # env — never commit real Firebase credentials
 .env
 .env.local

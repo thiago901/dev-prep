@@ -1,7 +1,8 @@
-import type { Content } from '@/domain/types';
+import type { Content, LearningPath, SourceRef } from '@/domain/types';
 import { loadSeedContent } from '@/data/seed';
 import {
   EMPTY_SNAPSHOT,
+  type CatalogRepository,
   type ContentRepository,
   type RecordingBlobStore,
   type StudyRepository,
@@ -9,7 +10,22 @@ import {
 } from '@/data/ports';
 import { BLOB_STORE, KV_STORE, idb } from './idb';
 
-/** Content bundled with the app. Used until a Firestore project is configured. */
+/**
+ * The bundled catalogue. Loaded with the seed bank, so a local-mode install
+ * and an unseeded Firebase project both have paths and sources.
+ */
+export class SeedCatalogRepository implements CatalogRepository {
+  async paths(): Promise<LearningPath[]> {
+    const { LEARNING_PATHS } = await import('../seed/paths');
+    return LEARNING_PATHS;
+  }
+
+  async sources(): Promise<SourceRef[]> {
+    const { SOURCES } = await import('../seed/sources');
+    return SOURCES;
+  }
+}
+
 export class SeedContentRepository implements ContentRepository {
   async list(): Promise<Content[]> {
     const { all } = await loadSeedContent();

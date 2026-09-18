@@ -65,7 +65,7 @@ export function PracticeSessionPage() {
   const stored = useMemo(
     () =>
       requestedId
-        ? practiceSessions.find((session) => session.id === requestedId) ?? null
+        ? (practiceSessions.find((session) => session.id === requestedId) ?? null)
         : todaySession,
     [practiceSessions, requestedId, todaySession],
   );
@@ -128,6 +128,7 @@ function SessionRunner({
     toggleStarred,
     toggleFavorite,
     getRecordingUrl,
+    sourceById,
   } = useStudy();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -191,7 +192,12 @@ function SessionRunner({
   );
 
   const finishItem = useCallback(
-    (confidence: Confidence, mode: PracticeItem['mode'], durationMs: number, attemptId: string | null) => {
+    (
+      confidence: Confidence,
+      mode: PracticeItem['mode'],
+      durationMs: number,
+      attemptId: string | null,
+    ) => {
       updateItem({
         status: 'done',
         confidence,
@@ -264,7 +270,10 @@ function SessionRunner({
         <div className="mx-auto flex h-14 max-w-[52rem] items-center gap-3 px-4">
           <Mark size={20} />
           <span className="legend-type hidden sm:inline">{t(sessionName(session.size))}</span>
-          <span data-tabular className="whitespace-nowrap font-mono text-body tabular-nums text-legend">
+          <span
+            data-tabular
+            className="whitespace-nowrap font-mono text-body tabular-nums text-legend"
+          >
             {viewing + 1} / {session.items.length}
           </span>
           <span className="inline-flex min-w-0 items-center gap-1.5">
@@ -320,14 +329,24 @@ function SessionRunner({
               });
             }}
             onSilentAttempt={async () => {
-              await saveAttempt({ contentId: content.id, mode: 'silent', locale: answerLocale, durationMs: 0 });
+              await saveAttempt({
+                contentId: content.id,
+                mode: 'silent',
+                locale: answerLocale,
+                durationMs: 0,
+              });
             }}
             onDeleteAttempt={deleteAttempt}
             onToggleStar={toggleStarred}
             onGrade={async (confidence) => {
               const attempt = latestAttemptSince(item.startedAt);
               await grade(content.id, confidence, Boolean(attempt));
-              finishItem(confidence, attempt?.mode ?? null, attempt?.durationMs ?? 0, attempt?.id ?? null);
+              finishItem(
+                confidence,
+                attempt?.mode ?? null,
+                attempt?.durationMs ?? 0,
+                attempt?.id ?? null,
+              );
             }}
             onSaveWritten={async (answer) => {
               await saveAttempt({
@@ -356,6 +375,7 @@ function SessionRunner({
             }}
             onRevealWithoutAttempt={() => markRevealedWithoutAttempt(content.id)}
             getRecordingUrl={getRecordingUrl}
+            sourceById={sourceById}
             contentById={index.byId}
             onNavigate={() => undefined}
           />
@@ -443,13 +463,16 @@ function PracticeSummary({ session }: { session: PracticeSession }) {
         <div className="space-y-2">
           <h1 className="flex flex-wrap items-baseline gap-x-4 text-deck font-semibold tracking-[-0.025em] text-legend">
             {session.endedEarly ? t('practice.complete.ended') : t('practice.complete.title')}
-            <span data-tabular className="font-mono text-prompt font-normal tabular-nums text-legend-2">
+            <span
+              data-tabular
+              className="font-mono text-prompt font-normal tabular-nums text-legend-2"
+            >
               {summary.completed} / {summary.total}
             </span>
           </h1>
           <p className="text-meta text-legend-3">
-            {t('practice.summary.time')}: ~{summary.minutes} min · {t('practice.summary.recordings')}:{' '}
-            <span data-tabular>{summary.recordings}</span>
+            {t('practice.summary.time')}: ~{summary.minutes} min ·{' '}
+            {t('practice.summary.recordings')}: <span data-tabular>{summary.recordings}</span>
           </p>
         </div>
 
@@ -486,7 +509,10 @@ function PracticeSummary({ session }: { session: PracticeSession }) {
                       {KIND_ICON[kind]}
                     </span>
                     <span className="text-body text-legend-2">{t(`kind.${kind}`)}</span>
-                    <span data-tabular className="ml-auto font-mono text-meta tabular-nums text-legend-2">
+                    <span
+                      data-tabular
+                      className="ml-auto font-mono text-meta tabular-nums text-legend-2"
+                    >
                       {count}
                     </span>
                   </li>
@@ -512,7 +538,9 @@ function PracticeSummary({ session }: { session: PracticeSession }) {
           <PanelHeader legend={t('practice.summary.needsReview')} headingId="summary-review" />
           <PanelRule />
           {summary.needsReview.length === 0 ? (
-            <p className="px-4 py-5 text-body text-legend-3">{t('practice.summary.needsReview.none')}</p>
+            <p className="px-4 py-5 text-body text-legend-3">
+              {t('practice.summary.needsReview.none')}
+            </p>
           ) : (
             <ul>
               {summary.needsReview.map((contentId) => {
@@ -525,8 +553,13 @@ function PracticeSummary({ session }: { session: PracticeSession }) {
                       className="group flex items-center gap-3 border-t border-rule/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-plate"
                     >
                       <Lamp tone="brass" />
-                      <span className="min-w-0 flex-1 truncate text-body text-legend">{text(content.title)}</span>
-                      <LuArrowRight aria-hidden="true" className="shrink-0 text-legend-3 group-hover:text-legend" />
+                      <span className="min-w-0 flex-1 truncate text-body text-legend">
+                        {text(content.title)}
+                      </span>
+                      <LuArrowRight
+                        aria-hidden="true"
+                        className="shrink-0 text-legend-3 group-hover:text-legend"
+                      />
                     </Link>
                   </li>
                 );
@@ -574,14 +607,20 @@ function PracticeSummary({ session }: { session: PracticeSession }) {
                   ) : recommendation.kind === 'english-short' ? (
                     <p className="max-w-read text-body text-legend-2">
                       {t('practice.rec.english', { percent: recommendation.percentOfUsual })}{' '}
-                      <Link to="/english" className="text-legend underline decoration-rule-strong underline-offset-4">
+                      <Link
+                        to="/english"
+                        className="text-legend underline decoration-rule-strong underline-offset-4"
+                      >
                         {t('nav.english')}
                       </Link>
                     </p>
                   ) : (
                     <p className="max-w-read text-body text-legend-2">
                       {t('practice.rec.push')}{' '}
-                      <Link to="/practice" className="text-legend underline decoration-rule-strong underline-offset-4">
+                      <Link
+                        to="/practice"
+                        className="text-legend underline decoration-rule-strong underline-offset-4"
+                      >
                         {t('practice.prefs.title')}
                       </Link>
                     </p>

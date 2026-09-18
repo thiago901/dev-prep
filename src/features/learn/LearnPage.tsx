@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LuArrowRight } from 'react-icons/lu';
 import { pathProgress, recommendPath, type PathProgress } from '@/domain/paths';
 import { activityKindOf } from '@/domain/activity';
-import { LEARNING_PATHS } from '@/data/seed/paths';
 import { CATEGORIES } from '@/data/seed/taxonomy';
 import { stateOf } from '@/domain/selectors';
 import { useStudy } from '@/app/providers/StudyProvider';
@@ -24,12 +23,12 @@ import { ActivityChip } from '@/features/content/ActivityChip';
  * a competing headline.
  */
 export function LearnPage() {
-  const { ready, index, snapshot } = useStudy();
+  const { ready, index, snapshot, paths: catalogue } = useStudy();
   const { t, text } = useI18n();
 
   const paths = useMemo(
-    () => LEARNING_PATHS.map((path) => pathProgress(path, index.byId, snapshot.progress)),
-    [index.byId, snapshot.progress],
+    () => catalogue.map((path) => pathProgress(path, index.byId, snapshot.progress)),
+    [catalogue, index.byId, snapshot.progress],
   );
   const featured = useMemo(() => recommendPath(paths), [paths]);
   const rest = useMemo(

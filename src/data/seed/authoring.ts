@@ -8,6 +8,7 @@ import type {
   Locale,
   LocalizedList,
   LocalizedText,
+  DecisionInteractionMode,
   OptionQuality,
   ResponseMode,
 } from '@/domain/types';
@@ -70,18 +71,11 @@ export const choices = (
 ): Draft => ({ kind: 'choices', phase: 'prompt', multiple, options });
 
 /**
- * Yes/no statements, asked straight after the material. Ids are positional so
- * an author writes the question and nothing else.
+ * Decision cards. Both calls have to sound like something a developer says.
+ *
+ * `mode` decides how the same cards are pressed: `binary` for true/false
+ * statements about the world, `buttons` or `swipe` for "what would you do".
  */
-export const quickChecks = (
-  questions: Array<{ statement: LocalizedText; answer: boolean; why: LocalizedText }>,
-): Draft => ({
-  kind: 'quick-check',
-  phase: 'prompt',
-  questions: questions.map((question, index) => ({ id: `q${index + 1}`, ...question })),
-});
-
-/** Decision cards. Both calls have to sound like something a developer says. */
 export const decisions = (
   cards: Array<{
     statement: LocalizedText;
@@ -91,11 +85,38 @@ export const decisions = (
     context?: LocalizedText;
     tradeOff?: LocalizedText;
   }>,
+  mode: DecisionInteractionMode = 'swipe',
 ): Draft => ({
   kind: 'decision',
   phase: 'prompt',
+  interactionMode: mode,
   cards: cards.map((card, index) => ({ id: `d${index + 1}`, ...card })),
 });
+
+/**
+ * True/false statements about how something behaves. The same block as a
+ * decision deck, pressed with two keys instead of a drag.
+ */
+export const trueFalse = (
+  statements: Array<{ statement: LocalizedText; answer: boolean; why: LocalizedText }>,
+): Draft =>
+  decisions(
+    statements.map((entry) => ({
+      statement: entry.statement,
+      expected: entry.answer ? ('agree' as const) : ('disagree' as const),
+      verdict: entry.answer ? { pt: 'Verdadeiro.', en: 'True.' } : { pt: 'Falso.', en: 'False.' },
+      why: entry.why,
+    })),
+    'binary',
+  );
+
+/** How an open answer is judged, in the four steps an interviewer uses. */
+export const rubric = (levels: {
+  incorrect: LocalizedText;
+  partial: LocalizedText;
+  strong: LocalizedText;
+  interviewReady: LocalizedText;
+}): Draft => ({ kind: 'answer-rubric', phase: 'answer', ...levels });
 
 /** Prose on the prompt side. Learn cards are built out of these. */
 export const note = (text: LocalizedText, heading?: LocalizedText): Draft => ({
@@ -221,7 +242,9 @@ export interface ContentInput {
   mode?: ResponseMode;
   title: LocalizedText;
   categoryId: string;
+  topic?: string;
   stackIds?: string[];
+  sourceIds?: string[];
   skillIds: string[];
   difficulty: DifficultyId;
   tags?: string[];
@@ -253,7 +276,9 @@ export function content(input: ContentInput): Content {
     status: 'published',
     title: input.title,
     categoryId: input.categoryId,
+    ...(input.topic ? { topic: input.topic } : {}),
     stackIds: input.stackIds ?? [],
+    ...(input.sourceIds?.length ? { sourceIds: input.sourceIds } : {}),
     skillIds: input.skillIds,
     difficulty: input.difficulty,
     tags: input.tags ?? [],

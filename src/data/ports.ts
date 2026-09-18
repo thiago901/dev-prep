@@ -1,6 +1,8 @@
 import type {
   Attempt,
   Content,
+  LearningPath,
+  SourceRef,
   ContentProgress,
   MockInterview,
   Recording,
@@ -22,6 +24,16 @@ export interface ContentRepository {
   /** Every published content item. */
   list(): Promise<Content[]>;
   getById(id: string): Promise<Content | null>;
+}
+
+/**
+ * The catalogue around the content: the paths that order it and the sources
+ * its claims come from. Separate from content because it is small, changes
+ * rarely, and is read once per session.
+ */
+export interface CatalogRepository {
+  paths(): Promise<LearningPath[]>;
+  sources(): Promise<SourceRef[]>;
 }
 
 /**

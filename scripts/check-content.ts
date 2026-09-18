@@ -29,8 +29,6 @@ for (const item of SEED_CONTENT) {
   if (kind === 'learn') {
     if (item.blocks.length < 3) problems.push(`${item.id}: learn card is too thin`);
     if (mode !== 'read') problems.push(`${item.id}: learn card should be read-only`);
-  } else if (kind === 'quick-check') {
-    if (!has('quick-check')) problems.push(`${item.id}: quick check has no quick-check block`);
   } else if (kind === 'decision') {
     if (!has('decision')) problems.push(`${item.id}: decision has no decision block`);
   } else {
@@ -46,22 +44,8 @@ for (const item of SEED_CONTENT) {
   }
 
   for (const block of item.blocks) {
-    if (block.kind === 'quick-check') {
-      if (block.questions.length < 2) problems.push(`${item.id}: quick check needs two statements`);
-      for (const question of block.questions) {
-        for (const locale of item.languages) {
-          if (!question.statement[locale]) {
-            problems.push(`${item.id}: quick check statement missing ${locale}`);
-          }
-          if (!question.why[locale]) {
-            // Every answer is explained, including the right ones.
-            problems.push(`${item.id}: quick check explanation missing ${locale}`);
-          }
-        }
-      }
-    }
-
     if (block.kind === 'decision') {
+      if (block.cards.length < 2) problems.push(`${item.id}: a decision deck needs two cards`);
       for (const card of block.cards) {
         for (const locale of item.languages) {
           if (!card.statement[locale] || !card.verdict[locale] || !card.why[locale]) {

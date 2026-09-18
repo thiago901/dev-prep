@@ -22,6 +22,8 @@ import type {
   Attempt,
   Content,
   ContentProgress,
+  LearningPath,
+  SourceRef,
   MockInterview,
   Recording,
   StudySession,
@@ -31,6 +33,7 @@ import type {
 import type { PracticePreferences, PracticeSession } from '@/domain/practice';
 import {
   EMPTY_SNAPSHOT,
+  type CatalogRepository,
   type ContentRepository,
   type RecordingBlobStore,
   type StudyRepository,
@@ -76,6 +79,29 @@ export class FirestoreContentRepository implements ContentRepository {
       // fall through
     }
     return this.fallback.getById(id);
+  }
+}
+
+/** Paths and sources from Firestore, falling back to the bundled catalogue. */
+export class FirestoreCatalogRepository implements CatalogRepository {
+  constructor(private readonly fallback: CatalogRepository) {}
+
+  private async listFrom<T>(name: string, fallback: () => Promise<T[]>): Promise<T[]> {
+    try {
+      const snapshot = await getDocs(collection(db(), name));
+      if (snapshot.empty) return fallback();
+      return snapshot.docs.map((docSnap) => docSnap.data() as T);
+    } catch {
+      return fallback();
+    }
+  }
+
+  paths(): Promise<LearningPath[]> {
+    return this.listFrom('learningPaths', () => this.fallback.paths());
+  }
+
+  sources(): Promise<SourceRef[]> {
+    return this.listFrom('sources', () => this.fallback.sources());
   }
 }
 

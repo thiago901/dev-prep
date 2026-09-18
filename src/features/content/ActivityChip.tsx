@@ -3,7 +3,6 @@ import {
   LuArrowLeftRight,
   LuBookOpen,
   LuBug,
-  LuCircleCheck,
   LuCode,
   LuFlame,
   LuMessagesSquare,
@@ -29,7 +28,6 @@ import { TransportButton } from '@/components/lab/Transport';
 
 export const ACTIVITY_ICONS: Record<ActivityKind, ReactNode> = {
   learn: <LuBookOpen />,
-  'quick-check': <LuCircleCheck />,
   decision: <LuArrowLeftRight />,
   'multiple-choice': <LuTarget />,
   'code-reading': <LuCode />,

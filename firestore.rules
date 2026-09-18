@@ -60,6 +60,23 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ---------------------------------------------------------------------
+    // learningPaths — the order content is taught in. Public, like content:
+    // a visitor can browse a path before signing in. Admin-only writes.
+    // ---------------------------------------------------------------------
+    match /learningPaths/{pathId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------------------------
+    // sources — the documentation each item cites. Public read, admin write.
+    // ---------------------------------------------------------------------
+    match /sources/{sourceId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // taxonomy: categories, stacks, difficulties, content types, tags.
     match /taxonomy/{kind}/{itemId} {
       allow get, list: if true;

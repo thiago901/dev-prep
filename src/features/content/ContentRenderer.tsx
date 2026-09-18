@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { LuLock, LuLockOpen, LuStar, LuTriangleAlert } from 'react-icons/lu';
-import type { Attempt, Confidence, Content, Locale, ResponseMode } from '@/domain/types';
+import { LuExternalLink, LuLock, LuLockOpen, LuStar, LuTriangleAlert } from 'react-icons/lu';
+import type { Attempt, Confidence, Content, Locale, ResponseMode, SourceRef } from '@/domain/types';
 import { DIFFICULTIES, STACKS } from '@/data/seed/taxonomy';
 import { activityKindOf, responseModeOf } from '@/domain/activity';
 import { cn } from '@/lib/utils';
@@ -55,6 +55,8 @@ export interface ContentRendererProps {
   /** Fired when a selection activity finishes, with how many answers landed. */
   onResult?: (result: { right: number; total: number }) => void;
   onSaveWritten?: (answer: string) => Promise<void>;
+  /** The catalogue of sources, so an item can cite without embedding links. */
+  sourceById?: Map<string, SourceRef>;
   autoFocusRecord?: boolean;
 }
 
@@ -81,6 +83,7 @@ export function ContentRenderer({
   onChoice,
   onResult,
   onSaveWritten,
+  sourceById = new Map<string, SourceRef>(),
   autoFocusRecord = false,
 }: ContentRendererProps) {
   const { t, text, isFallback } = useI18n();
@@ -150,6 +153,43 @@ export function ContentRenderer({
       .filter((attempt) => (gateSince ? attempt.createdAt >= gateSince : true));
     return relevant[relevant.length - 1]?.writtenAnswer ?? null;
   }, [attempts, gateSince]);
+
+  // Only sources this item actually cites, resolved against the catalogue.
+  const sources = useMemo(
+    () => (content.sourceIds ?? []).map((id) => sourceById.get(id)).filter(Boolean) as SourceRef[],
+    [content.sourceIds, sourceById],
+  );
+
+  const sourcesPanel =
+    sources.length > 0 ? (
+      <Panel className="overflow-hidden">
+        <div className="px-4 py-3">
+          <Legend>{t('sources.title')}</Legend>
+        </div>
+        <PanelRule />
+        <ul className="divide-y divide-rule/60">
+          {sources.map((source) => (
+            <li key={source.id}>
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group flex items-center gap-3 px-4 py-3 transition-colors duration-150 hover:bg-plate"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-body text-legend">{source.title}</span>
+                  <span className="legend-type mt-1 block">{source.publisher}</span>
+                </span>
+                <LuExternalLink
+                  aria-hidden="true"
+                  className="shrink-0 text-legend-3 transition-colors group-hover:text-legend-2"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+    ) : null;
 
   const englishOnly = content.languages.length === 1 && content.languages[0] === 'en';
 
@@ -284,6 +324,8 @@ export function ContentRenderer({
               </Panel>
             ) : null}
 
+            {sourcesPanel}
+
             {answerBlocks.map((block) => (
               <BlockRenderer key={block.id} block={block} context={blockContext} />
             ))}
@@ -317,7 +359,10 @@ export function ContentRenderer({
           </div>
         </>
       ) : mode === 'read' ? (
-        <LearnFooter gradedAs={gradedAs} onGrade={grade} />
+        <>
+          {sourcesPanel}
+          <LearnFooter gradedAs={gradedAs} onGrade={grade} />
+        </>
       ) : answerBlocks.length === 0 && mode === 'select' ? null : (
         <ChannelTwoLocked
           mode={mode}
@@ -440,7 +485,10 @@ function ConfidencePanel({
 }) {
   const { t } = useI18n();
 
-  const all: Record<Confidence, { label: string; tone: 'monitor' | 'brass' | 'record' | 'channel2' }> = {
+  const all: Record<
+    Confidence,
+    { label: string; tone: 'monitor' | 'brass' | 'record' | 'channel2' }
+  > = {
     unknown: { label: t('confidence.unknown'), tone: 'record' },
     partial: { label: t('confidence.partial'), tone: 'brass' },
     known: { label: t('confidence.known'), tone: 'monitor' },

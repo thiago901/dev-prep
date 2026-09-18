@@ -31,6 +31,7 @@ export function ContentPage() {
     toggleStarred,
     toggleFavorite,
     getRecordingUrl,
+    sourceById,
   } = useStudy();
 
   const content = useMemo(
@@ -158,6 +159,7 @@ export function ContentPage() {
           onResult={(result) => void handleResult(result)}
           onRevealWithoutAttempt={() => markRevealedWithoutAttempt(content.id)}
           getRecordingUrl={getRecordingUrl}
+          sourceById={sourceById}
           contentById={index.byId}
           onNavigate={(contentId) => {
             const target = index.byId.get(contentId);

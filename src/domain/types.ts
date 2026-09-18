@@ -59,7 +59,6 @@ export type ContentTypeId =
  */
 export type ActivityKind =
   | 'learn'
-  | 'quick-check'
   | 'decision'
   | 'multiple-choice'
   | 'code-reading'
@@ -261,30 +260,25 @@ export interface ChoicesBlock extends BaseBlock {
 }
 
 /**
- * A short run of yes/no statements, asked right after the material.
+ * How a decision is pressed. The content does not change with it.
  *
- * Every answer is explained, including the right ones: a bare tick teaches
- * nothing, and a user who guessed correctly still needs the reason.
+ * `binary` is true/false about the world, `buttons` and `swipe` are about
+ * what you would do. True/false, yes/no, agree/disagree and swipe are one
+ * activity with three input styles, never three content types.
  */
-export interface QuickCheckBlock extends BaseBlock {
-  kind: 'quick-check';
-  questions: Array<{
-    id: string;
-    statement: LocalizedText;
-    /** The true answer to the statement as written. */
-    answer: boolean;
-    why: LocalizedText;
-  }>;
-}
+export type DecisionInteractionMode = 'binary' | 'buttons' | 'swipe';
 
 /**
- * Decisions, one card at a time — swipe or press.
+ * Decisions, one card at a time.
  *
  * Each card is a sentence a real developer could say in a real review. No
  * strawmen: if the wrong call is obviously stupid, nothing was tested.
  */
 export interface DecisionBlock extends BaseBlock {
   kind: 'decision';
+  interactionMode?: DecisionInteractionMode;
+  /** Overrides the side labels. Defaults follow the interaction mode. */
+  labels?: { agree: LocalizedText; disagree: LocalizedText };
   cards: Array<{
     id: string;
     statement: LocalizedText;
@@ -297,6 +291,21 @@ export interface DecisionBlock extends BaseBlock {
     context?: LocalizedText;
     tradeOff?: LocalizedText;
   }>;
+}
+
+/**
+ * How an open answer is judged.
+ *
+ * Open questions are not right or wrong. This is the ladder an interviewer
+ * actually walks: something is missing, something works but misses a
+ * constraint, something is right, and something is right *and* said well.
+ */
+export interface AnswerRubricBlock extends BaseBlock {
+  kind: 'answer-rubric';
+  incorrect: LocalizedText;
+  partial: LocalizedText;
+  strong: LocalizedText;
+  interviewReady: LocalizedText;
 }
 
 export interface CompareBlock extends BaseBlock {
@@ -372,8 +381,8 @@ export type Block =
   | FollowUpBlock
   | RelatedBlock
   | ChoicesBlock
-  | QuickCheckBlock
   | DecisionBlock
+  | AnswerRubricBlock
   | CompareBlock
   | VideoBlock
   | LinkBlock
@@ -385,6 +394,17 @@ export type BlockKind = Block['kind'];
 // ---------------------------------------------------------------------------
 // Content
 // ---------------------------------------------------------------------------
+
+/**
+ * A real, checkable source. Official documentation first; never invented.
+ */
+export interface SourceRef {
+  id: string;
+  title: string;
+  url: string;
+  publisher: string;
+  kind: 'official_docs' | 'reference' | 'article' | 'rfc' | 'security' | 'book';
+}
 
 export interface Content {
   id: string;
@@ -402,7 +422,11 @@ export interface Content {
 
   title: LocalizedText;
   categoryId: string;
+  /** Finer than a category: the subject this item belongs to inside it. */
+  topic?: string;
   stackIds: string[];
+  /** Ids into the source list. Empty is honest; a fabricated link is not. */
+  sourceIds?: string[];
   skillIds: string[];
   difficulty: DifficultyId;
   tags: string[];
@@ -483,7 +507,11 @@ export interface LearningPath {
   /** One line: what you will be able to answer when you finish. */
   summary: LocalizedText;
   categoryId: string;
+  /** Finer than a category: the subject this item belongs to inside it. */
+  topic?: string;
   stackIds: string[];
+  /** Ids into the source list. Empty is honest; a fabricated link is not. */
+  sourceIds?: string[];
   difficulty: DifficultyId;
   /** Content ids, in teaching order. */
   stepIds: string[];

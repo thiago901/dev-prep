@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { LuArrowLeft, LuCheck } from 'react-icons/lu';
 import { pathProgress } from '@/domain/paths';
 import { activityKindOf } from '@/domain/activity';
-import { LEARNING_PATH_BY_SLUG } from '@/data/seed/paths';
 import { useStudy } from '@/app/providers/StudyProvider';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
@@ -24,9 +23,9 @@ export function PathPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { t, text } = useI18n();
-  const { ready, index, snapshot } = useStudy();
+  const { ready, index, snapshot, paths: catalogue } = useStudy();
 
-  const path = slug ? LEARNING_PATH_BY_SLUG.get(slug) : undefined;
+  const path = slug ? catalogue.find((entry) => entry.slug === slug) : undefined;
   const progress = useMemo(
     () => (path ? pathProgress(path, index.byId, snapshot.progress) : null),
     [path, index.byId, snapshot.progress],

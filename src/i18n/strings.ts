@@ -609,15 +609,10 @@ export const STRINGS = {
     pt: 'Leia um resumo curto do assunto. Nada é cobrado aqui.',
     en: 'Read a short briefing on the subject. Nothing is graded here.',
   },
-  'activity.quick-check': { pt: 'Checagem rápida', en: 'Quick check' },
-  'activity.quick-check.what': {
-    pt: 'Algumas afirmações para responder sim ou não. Cada resposta vem explicada.',
-    en: 'A few statements to answer yes or no. Every answer comes explained.',
-  },
   'activity.decision': { pt: 'Decisão', en: 'Decision' },
   'activity.decision.what': {
-    pt: 'Decisões que um dev toma de verdade. Arraste o card ou use os botões.',
-    en: 'Calls a developer actually makes. Swipe the card or use the buttons.',
+    pt: 'Tome uma posição: verdadeiro ou falso, faria ou não faria. Cada resposta vem explicada.',
+    en: 'Take a side: true or false, would or would not. Every answer comes explained.',
   },
   'activity.multiple-choice': { pt: 'Múltipla escolha', en: 'Multiple choice' },
   'activity.multiple-choice.what': {
@@ -704,6 +699,8 @@ export const STRINGS = {
 
   // --- decision -------------------------------------------------------------
   'decision.agree': { pt: 'Eu faria', en: 'I would' },
+  'decision.true': { pt: 'Verdadeiro', en: 'True' },
+  'decision.false': { pt: 'Falso', en: 'False' },
   'decision.disagree': { pt: 'Não faria', en: 'I would not' },
   'decision.help': {
     pt: 'Arraste o card para o lado ou use os botões.',
@@ -733,6 +730,13 @@ export const STRINGS = {
 
   // --- feedback after answering --------------------------------------------
   'feedback.title': { pt: 'O que isso ensina', en: 'What this teaches' },
+  // The four steps an interviewer walks when judging an open answer.
+  'rubric.title': { pt: 'Como esta resposta é avaliada', en: 'How this answer is judged' },
+  'rubric.incorrect': { pt: 'Falta o principal', en: 'Misses the point' },
+  'rubric.partial': { pt: 'Funciona, mas incompleta', en: 'Works, but incomplete' },
+  'rubric.strong': { pt: 'Resposta forte', en: 'Strong answer' },
+  'rubric.interviewReady': { pt: 'Pronta para entrevista', en: 'Interview-ready' },
+  'sources.title': { pt: 'Fontes', en: 'Sources' },
   'feedback.expected': { pt: 'Raciocínio esperado', en: 'Expected reasoning' },
   'feedback.why': { pt: 'Por quê', en: 'Why' },
   'feedback.better': { pt: 'Resposta mais forte', en: 'A stronger answer' },

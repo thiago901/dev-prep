@@ -11,7 +11,7 @@ import {
   mistakes,
   note,
   prompt,
-  quickChecks,
+  trueFalse,
   t,
   tip,
   tradeOff,
@@ -111,8 +111,8 @@ const stolen = localStorage.getItem('access_token');
   content({
     slug: 'sec-session-storage-check',
     type: 'true-false',
-    kind: 'quick-check',
-    title: t('Checagem: sessão e localStorage', 'Quick check: sessions and localStorage'),
+    kind: 'decision',
+    title: t('Verdadeiro ou falso: sessão e localStorage', 'True or false: sessions and localStorage'),
     categoryId: 'security',
     stackIds: ['javascript'],
     skillIds: ['security'],
@@ -121,7 +121,7 @@ const stolen = localStorage.getItem('access_token');
     minutes: 2,
     related: ['sec-session-storage-learn'],
     blocks: [
-      quickChecks([
+      trueFalse([
         {
           statement: t(
             'O `localStorage` pode ser lido por qualquer JavaScript que rode naquela página.',
@@ -517,8 +517,8 @@ console.log('sync');
   content({
     slug: 'js-event-loop-check',
     type: 'true-false',
-    kind: 'quick-check',
-    title: t('Checagem: event loop', 'Quick check: the event loop'),
+    kind: 'decision',
+    title: t('Verdadeiro ou falso: event loop', 'True or false: the event loop'),
     categoryId: 'javascript',
     stackIds: ['javascript', 'nodejs'],
     skillIds: ['javascript'],
@@ -527,7 +527,7 @@ console.log('sync');
     minutes: 2,
     related: ['js-event-loop-learn', 'js-event-loop-order'],
     blocks: [
-      quickChecks([
+      trueFalse([
         {
           statement: t(
             'Node executa o seu código de aplicação em várias threads por padrão.',
@@ -574,8 +574,8 @@ console.log('sync');
     kind: 'learn',
     title: t('O que o banco faz com um índice', 'What the database does with an index'),
     categoryId: 'database',
-    stackIds: ['postgresql'],
-    skillIds: ['database'],
+    stackIds: ['postgres'],
+    skillIds: ['databases'],
     difficulty: 'intermediate',
     tags: ['índice', 'performance', 'query'],
     minutes: 4,
@@ -636,8 +636,8 @@ SELECT * FROM orders WHERE created_at > now() - interval '7 days';
     kind: 'decision',
     title: t('Decisões sobre índices', 'Calls about indexes'),
     categoryId: 'database',
-    stackIds: ['postgresql'],
-    skillIds: ['database'],
+    stackIds: ['postgres'],
+    skillIds: ['databases'],
     difficulty: 'intermediate',
     tags: ['índice', 'performance'],
     minutes: 3,
@@ -704,7 +704,7 @@ SELECT * FROM orders WHERE created_at > now() - interval '7 days';
     kind: 'learn',
     title: t('Idempotência sem decorar a definição', 'Idempotency without memorising the definition'),
     categoryId: 'backend',
-    stackIds: ['nodejs', 'rest-api'],
+    stackIds: ['nodejs', 'rest'],
     skillIds: ['api-design'],
     difficulty: 'intermediate',
     tags: ['idempotência', 'retry', 'pagamento'],
@@ -766,17 +766,17 @@ Idempotency-Key: 9f1c2b7a-6d2e-4f3a-b0c9-2f1d5e7a8b30
   content({
     slug: 'api-idempotency-check',
     type: 'true-false',
-    kind: 'quick-check',
-    title: t('Checagem: idempotência', 'Quick check: idempotency'),
+    kind: 'decision',
+    title: t('Verdadeiro ou falso: idempotência', 'True or false: idempotency'),
     categoryId: 'backend',
-    stackIds: ['rest-api'],
+    stackIds: ['rest'],
     skillIds: ['api-design'],
     difficulty: 'beginner',
     tags: ['idempotência', 'http'],
     minutes: 2,
     related: ['api-idempotency-learn'],
     blocks: [
-      quickChecks([
+      trueFalse([
         {
           statement: t(
             'Um `DELETE` repetido no mesmo recurso é idempotente.',
@@ -820,7 +820,7 @@ Idempotency-Key: 9f1c2b7a-6d2e-4f3a-b0c9-2f1d5e7a8b30
     kind: 'multiple-choice',
     title: t('Cobrança duplicada no retry', 'Double charge on retry'),
     categoryId: 'backend',
-    stackIds: ['nodejs', 'rest-api', 'postgresql'],
+    stackIds: ['nodejs', 'rest', 'postgres'],
     skillIds: ['api-design'],
     difficulty: 'advanced',
     tags: ['idempotência', 'retry', 'concorrência'],

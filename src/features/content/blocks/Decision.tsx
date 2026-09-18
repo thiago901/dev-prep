@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { LuArrowLeft, LuArrowRight, LuCircleCheck, LuCircleX } from 'react-icons/lu';
-import type { DecisionBlock, Locale } from '@/domain/types';
+import type { DecisionBlock, DecisionInteractionMode, Locale } from '@/domain/types';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
 import { Legend, Panel, PanelRule } from '@/components/lab/Panel';
@@ -8,12 +8,15 @@ import { TransportButton } from '@/components/lab/Transport';
 import { Prose, renderInline } from './Prose';
 
 /**
- * Decision cards — the third rung.
+ * Decisions — one activity, three ways of pressing it.
  *
- * A statement a developer could actually say in a review, and two calls that
- * are both defensible-sounding. Dragging is the fast path; the two keys below
- * do exactly the same thing, so nothing here depends on a gesture, a pointer
- * or a steady hand.
+ * True/false, yes/no, agree/disagree and swipe are the same work: read a
+ * statement a developer could really make, take a side, and be told what the
+ * side costs. Only `interactionMode` differs, so the same authored card can
+ * ship as a swipe deck on a phone and as two keys anywhere else.
+ *
+ * Dragging is never the only way through: the two keys do exactly the same
+ * thing, which is what keeps this usable by keyboard and by screen reader.
  */
 
 const COMMIT_PX = 72;
@@ -33,6 +36,22 @@ export function Decision({
   const [right, setRight] = useState(0);
   const [drag, setDrag] = useState(0);
   const pointerStart = useRef<number | null>(null);
+
+  const mode: DecisionInteractionMode = block.interactionMode ?? 'swipe';
+  const draggable = mode === 'swipe';
+
+  // Binary items are statements about the world: true or false. Swipe and
+  // button decks are about what you would do.
+  const agreeLabel = block.labels?.agree
+    ? text(block.labels.agree)
+    : mode === 'binary'
+      ? t('decision.true')
+      : t('decision.agree');
+  const disagreeLabel = block.labels?.disagree
+    ? text(block.labels.disagree)
+    : mode === 'binary'
+      ? t('decision.false')
+      : t('decision.disagree');
 
   const total = block.cards.length;
   const card = block.cards[index];
@@ -68,7 +87,7 @@ export function Decision({
 
   // --- dragging: enhancement only, never the only way through ---------------
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (decided) return;
+    if (decided || !draggable) return;
     pointerStart.current = event.clientX;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
@@ -100,38 +119,38 @@ export function Decision({
       <div className="px-4 py-5">
         <div className="relative">
           {/* The two sides of the table, lit only by the direction of travel. */}
-          <span
-            aria-hidden="true"
-            className={cn(
-              'legend-type absolute left-0 top-1/2 -translate-y-1/2 transition-opacity duration-150',
-              leaning === 'disagree' ? 'text-record-ink opacity-100' : 'opacity-0',
-            )}
-          >
-            {t('decision.disagree')}
-          </span>
-          <span
-            aria-hidden="true"
-            className={cn(
-              'legend-type absolute right-0 top-1/2 -translate-y-1/2 transition-opacity duration-150',
-              leaning === 'agree' ? 'text-monitor opacity-100' : 'opacity-0',
-            )}
-          >
-            {t('decision.agree')}
-          </span>
+          {draggable ? (
+            <>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'legend-type absolute left-0 top-1/2 -translate-y-1/2 transition-opacity duration-150',
+                  leaning === 'disagree' ? 'text-record-ink opacity-100' : 'opacity-0',
+                )}
+              >
+                {disagreeLabel}
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'legend-type absolute right-0 top-1/2 -translate-y-1/2 transition-opacity duration-150',
+                  leaning === 'agree' ? 'text-monitor opacity-100' : 'opacity-0',
+                )}
+              >
+                {agreeLabel}
+              </span>
+            </>
+          ) : null}
 
           <div
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
-            style={
-              drag
-                ? { transform: `translateX(${drag}px) rotate(${drag / 40}deg)` }
-                : undefined
-            }
+            style={drag ? { transform: `translateX(${drag}px) rotate(${drag / 40}deg)` } : undefined}
             className={cn(
               'recess select-none px-4 py-5 sm:px-5',
-              !decided && 'cursor-grab touch-pan-y active:cursor-grabbing',
+              draggable && !decided && 'cursor-grab touch-pan-y active:cursor-grabbing',
               !drag && 'transition-transform duration-200 ease-engage',
             )}
           >
@@ -145,23 +164,23 @@ export function Decision({
           <TransportButton
             className="min-h-11 flex-1"
             variant="neutral"
-            icon={<LuArrowLeft />}
+            icon={draggable ? <LuArrowLeft /> : undefined}
             disabled={decided}
             onClick={() => decide('disagree')}
           >
-            {t('decision.disagree')}
+            {disagreeLabel}
           </TransportButton>
           <TransportButton
-            className="min-h-11 flex-1 flex-row-reverse"
+            className={cn('min-h-11 flex-1', draggable && 'flex-row-reverse')}
             variant="neutral"
-            icon={<LuArrowRight />}
+            icon={draggable ? <LuArrowRight /> : undefined}
             disabled={decided}
             onClick={() => decide('agree')}
           >
-            {t('decision.agree')}
+            {agreeLabel}
           </TransportButton>
         </div>
-        {!decided ? (
+        {!decided && draggable ? (
           <p className="mt-2.5 text-micro text-legend-3">{t('decision.help')}</p>
         ) : null}
       </div>
@@ -174,13 +193,13 @@ export function Decision({
               <span className="legend-type">
                 {t('decision.yours')}{' '}
                 <span className="text-legend">
-                  {choice === 'agree' ? t('decision.agree') : t('decision.disagree')}
+                  {choice === 'agree' ? agreeLabel : disagreeLabel}
                 </span>
               </span>
               <span className="legend-type">
                 {t('decision.expected')}{' '}
                 <span className="text-legend">
-                  {card.expected === 'agree' ? t('decision.agree') : t('decision.disagree')}
+                  {card.expected === 'agree' ? agreeLabel : disagreeLabel}
                 </span>
               </span>
               <span

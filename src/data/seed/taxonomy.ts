@@ -78,6 +78,15 @@ export const CATEGORIES: Category[] = [
     order: 7,
   },
   {
+    id: 'code-quality',
+    label: { pt: 'Qualidade de código', en: 'Code quality' },
+    blurb: {
+      pt: 'SOLID, testes e refatoração — as decisões que aparecem em code review e em entrevista.',
+      en: 'SOLID, tests and refactoring — the calls that show up in code review and in interviews.',
+    },
+    order: 9,
+  },
+  {
     id: 'devops',
     label: { pt: 'DevOps', en: 'DevOps' },
     blurb: {

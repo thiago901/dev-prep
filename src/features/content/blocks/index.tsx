@@ -27,7 +27,6 @@ import { Tag } from '@/components/ui/States';
 import { TwoPositionSwitch } from '@/components/lab/Transport';
 import { CodeView } from './CodeView';
 import { Prose, renderInline } from './Prose';
-import { QuickCheck } from './QuickCheck';
 import { Decision } from './Decision';
 
 /**
@@ -646,9 +645,29 @@ export function BlockRenderer({ block, context }: { block: Block; context: Block
     case 'related':
       return <RelatedContent contentIds={block.contentIds} context={context} />;
 
-    case 'quick-check':
+    case 'answer-rubric':
       return (
-        <QuickCheck block={block} answerLocale={context.answerLocale} onResult={context.onResult} />
+        <Panel className="overflow-hidden">
+          <div className="px-4 py-3">
+            <Legend>{t('rubric.title')}</Legend>
+          </div>
+          <div className="h-px w-full bg-rule" />
+          <ol className="divide-y divide-rule/60">
+            {(
+              [
+                ['incorrect', block.incorrect, 'text-record-ink'],
+                ['partial', block.partial, 'text-brass'],
+                ['strong', block.strong, 'text-monitor'],
+                ['interviewReady', block.interviewReady, 'text-legend'],
+              ] as const
+            ).map(([level, body, ink]) => (
+              <li key={level} className="px-4 py-3">
+                <p className={cn('legend-type mb-1.5', ink)}>{t(`rubric.${level}`)}</p>
+                <Prose text={text(body, context.answerLocale)} />
+              </li>
+            ))}
+          </ol>
+        </Panel>
       );
 
     case 'decision':

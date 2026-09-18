@@ -1,8 +1,14 @@
-import type { ContentRepository, RecordingBlobStore, StudyRepository } from './ports';
+import type {
+  CatalogRepository,
+  ContentRepository,
+  RecordingBlobStore,
+  StudyRepository,
+} from './ports';
 import { isFirebaseConfigured } from './firebase/env';
 import {
   LocalRecordingBlobStore,
   LocalStudyRepository,
+  SeedCatalogRepository,
   SeedContentRepository,
 } from './local/localRepositories';
 
@@ -14,10 +20,12 @@ import {
  */
 
 const seedContent = new SeedContentRepository();
+const seedCatalog = new SeedCatalogRepository();
 const localStudy = new LocalStudyRepository();
 const localBlobs = new LocalRecordingBlobStore();
 
 let contentRepository: ContentRepository = seedContent;
+let catalogRepository: CatalogRepository = seedCatalog;
 let studyRepository: StudyRepository = localStudy;
 let recordingBlobStore: RecordingBlobStore = localBlobs;
 
@@ -31,6 +39,7 @@ let recordingBlobStore: RecordingBlobStore = localBlobs;
 export async function configureRepositories(uid: string | null): Promise<void> {
   if (!isFirebaseConfigured || !uid) {
     contentRepository = seedContent;
+    catalogRepository = seedCatalog;
     studyRepository = localStudy;
     recordingBlobStore = localBlobs;
     return;
@@ -38,13 +47,21 @@ export async function configureRepositories(uid: string | null): Promise<void> {
 
   // Loaded on demand so the Firestore and Storage chunks stay out of the
   // initial bundle for guests and for local-mode installs.
-  const [{ ensureFirebaseApp }, { FirebaseRecordingBlobStore, FirestoreContentRepository, FirestoreStudyRepository }] =
-    await Promise.all([import('./firebase/config'), import('./firebase/repositories')]);
+  const [
+    { ensureFirebaseApp },
+    {
+      FirebaseRecordingBlobStore,
+      FirestoreCatalogRepository,
+      FirestoreContentRepository,
+      FirestoreStudyRepository,
+    },
+  ] = await Promise.all([import('./firebase/config'), import('./firebase/repositories')]);
 
   // The app has to exist before any repository touches Firestore or Storage.
   await ensureFirebaseApp();
 
   contentRepository = new FirestoreContentRepository(seedContent);
+  catalogRepository = new FirestoreCatalogRepository(seedCatalog);
   studyRepository = new FirestoreStudyRepository(uid);
   recordingBlobStore = new FirebaseRecordingBlobStore(uid, localBlobs);
 }
@@ -52,6 +69,9 @@ export async function configureRepositories(uid: string | null): Promise<void> {
 export const repositories = {
   get content(): ContentRepository {
     return contentRepository;
+  },
+  get catalog(): CatalogRepository {
+    return catalogRepository;
   },
   get study(): StudyRepository {
     return studyRepository;

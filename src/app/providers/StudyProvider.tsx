@@ -14,9 +14,11 @@ import type {
   Confidence,
   Content,
   ContentProgress,
+  LearningPath,
   Locale,
   MockInterview,
   Recording,
+  SourceRef,
   UserProfile,
 } from '@/domain/types';
 import { createProgress, gradeProgress, recordAttempt as applyAttempt } from '@/domain/srs';
@@ -49,6 +51,10 @@ interface StudyValue {
   ready: boolean;
   loadError: boolean;
   index: StudyIndex;
+  /** Learning paths, in catalogue order. */
+  paths: LearningPath[];
+  /** Sources by id, for the references an item cites. */
+  sourceById: Map<string, SourceRef>;
   snapshot: StudySnapshot;
   entitlements: ReturnType<typeof entitlementsFor>;
   reload: () => Promise<void>;
@@ -98,6 +104,10 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const { answerLocale } = useSettings();
 
   const [content, setContent] = useState<Content[]>([]);
+  // The catalogue travels with the content: Firestore when it is seeded, the
+  // bundled files otherwise. Screens never import the seed directly.
+  const [paths, setPaths] = useState<LearningPath[]>([]);
+  const [sources, setSources] = useState<SourceRef[]>([]);
   const [snapshot, setSnapshot] = useState<StudySnapshot>(EMPTY_SNAPSHOT);
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -111,12 +121,16 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async () => {
     setLoadError(false);
     try {
-      const [loadedContent, loadedSnapshot] = await Promise.all([
+      const [loadedContent, loadedSnapshot, loadedPaths, loadedSources] = await Promise.all([
         repositories.content.list(),
         repositories.study.load(),
+        repositories.catalog.paths(),
+        repositories.catalog.sources(),
       ]);
       setContent(loadedContent);
       setSnapshot(loadedSnapshot);
+      setPaths(loadedPaths);
+      setSources(loadedSources);
       void repositories.recordings.usedBytes().then(setStorageUsedBytes);
     } catch {
       setLoadError(true);
@@ -141,6 +155,11 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const index = useMemo(
     () => buildIndex(content, snapshot.progress, snapshot.attempts, snapshot.favorites),
     [content, snapshot.progress, snapshot.attempts, snapshot.favorites],
+  );
+
+  const sourceById = useMemo(
+    () => new Map(sources.map((source) => [source.id, source])),
+    [sources],
   );
 
   const entitlements = useMemo(
@@ -412,6 +431,8 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       ready,
       loadError,
       index,
+      paths,
+      sourceById,
       snapshot,
       entitlements,
       reload: load,
@@ -444,6 +465,8 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       ready,
       loadError,
       index,
+      paths,
+      sourceById,
       snapshot,
       entitlements,
       load,

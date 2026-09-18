@@ -27,8 +27,8 @@ export interface ActivityKindDef {
 
 export const ACTIVITY_KINDS: readonly ActivityKindDef[] = [
   { id: 'learn', level: 1, responseMode: 'read', speaking: false, minutes: 3 },
-  { id: 'quick-check', level: 2, responseMode: 'select', speaking: false, minutes: 1.5 },
-  { id: 'decision', level: 3, responseMode: 'select', speaking: false, minutes: 2 },
+  // Taking a side is one rung, however it is pressed.
+  { id: 'decision', level: 2, responseMode: 'select', speaking: false, minutes: 2 },
   { id: 'multiple-choice', level: 3, responseMode: 'select', speaking: false, minutes: 1.5 },
   { id: 'code-reading', level: 4, responseMode: 'write', speaking: false, minutes: 3 },
   { id: 'find-the-bug', level: 4, responseMode: 'write', speaking: false, minutes: 3 },
@@ -57,13 +57,12 @@ export function activityKindOf(content: Content): ActivityKind {
 
   const has = (kind: string) => content.blocks.some((block) => block.kind === kind);
   if (has('decision')) return 'decision';
-  if (has('quick-check')) return 'quick-check';
 
   switch (content.type) {
     case 'true-false':
-      // A binary item with a real answer side is a one-question choice; only
-      // the authored quick-check block makes it a run of statements.
-      return has('quick-check') ? 'quick-check' : 'multiple-choice';
+      // A binary item with a real answer side is a one-question choice; the
+      // authored decision block is what makes it a run of statements.
+      return 'multiple-choice';
     case 'multiple-choice':
       return 'multiple-choice';
     case 'code-reading':

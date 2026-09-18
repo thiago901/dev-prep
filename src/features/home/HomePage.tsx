@@ -2,7 +2,6 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LuArrowRight, LuFlame, LuMic } from 'react-icons/lu';
 import { CATEGORIES, SKILLS } from '@/data/seed/taxonomy';
-import { LEARNING_PATHS } from '@/data/seed/paths';
 import {
   computeSkillLevels,
   computeStreak,
@@ -50,8 +49,16 @@ const DEFAULT_MONITORS = [
  * presenting four equal options.
  */
 export function HomePage() {
-  const { ready, index, snapshot, todaySession, practicePreferences, planPractice, startPractice } =
-    useStudy();
+  const {
+    ready,
+    index,
+    snapshot,
+    todaySession,
+    practicePreferences,
+    planPractice,
+    startPractice,
+    paths: catalogue,
+  } = useStudy();
   const { user } = useAuth();
   const { t, text, locale } = useI18n();
   const navigate = useNavigate();
@@ -66,8 +73,8 @@ export function HomePage() {
   const goalPlan = useMemo(() => planPractice(goal), [planPractice, goal]);
 
   const paths = useMemo(
-    () => LEARNING_PATHS.map((path) => pathProgress(path, index.byId, snapshot.progress)),
-    [index.byId, snapshot.progress],
+    () => catalogue.map((path) => pathProgress(path, index.byId, snapshot.progress)),
+    [catalogue, index.byId, snapshot.progress],
   );
   const featuredPath = useMemo(() => recommendPath(paths), [paths]);
 

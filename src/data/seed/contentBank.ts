@@ -7,6 +7,12 @@ import { SECURITY_CONTENT } from './content/security';
 import { BEHAVIORAL_CONTENT } from './content/behavioral';
 import { ENGLISH_CONTENT } from './content/english';
 import { LADDER_CONTENT } from './content/ladder';
+import { QUALITY_CONTENT } from './content/quality';
+import { DDD_CONTENT } from './content/ddd';
+import { SCALE_CONTENT } from './content/scale';
+import { WEB_CONTENT } from './content/web';
+import { DELIVERY_CONTENT } from './content/delivery';
+import { ENGLISH_EXTRA_CONTENT } from './content/english-extra';
 
 /**
  * The seed content bank.
@@ -25,6 +31,12 @@ export const SEED_CONTENT: Content[] = [
   ...BEHAVIORAL_CONTENT,
   ...ENGLISH_CONTENT,
   ...LADDER_CONTENT,
+  ...QUALITY_CONTENT,
+  ...DDD_CONTENT,
+  ...SCALE_CONTENT,
+  ...WEB_CONTENT,
+  ...DELIVERY_CONTENT,
+  ...ENGLISH_EXTRA_CONTENT,
 ];
 
 // Fails loudly during development if two items collide on a slug.
