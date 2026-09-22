@@ -177,7 +177,9 @@ function FeaturedPath({ progress }: { progress: PathProgress }) {
           variant="primary"
           size="lg"
           onClick={() =>
-            navigate(next ? `/content/${next.slug}` : `/learn/${progress.path.slug}`)
+            navigate(
+              `/learn/${progress.path.slug}/step/${progress.complete ? 1 : progress.position}`,
+            )
           }
         >
           {progress.complete

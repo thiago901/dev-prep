@@ -779,6 +779,18 @@ export const STRINGS = {
   'path.stepDone': { pt: 'Feito', en: 'Done' },
   'path.current': { pt: 'Você está aqui', en: 'You are here' },
   'path.next': { pt: 'Próxima etapa', en: 'Next step' },
+  'path.prev': { pt: 'Etapa anterior', en: 'Previous step' },
+  'path.finish': { pt: 'Concluir trilha', en: 'Finish path' },
+  'path.exit': { pt: 'Sair da trilha', en: 'Leave path' },
+  'path.exit.saved': {
+    pt: 'Você pode sair: seu progresso na trilha fica salvo.',
+    en: 'You can leave: your progress in the path is saved.',
+  },
+  'path.stepDoneNow': { pt: 'Etapa concluída', en: 'Step done' },
+  'path.stepHint': {
+    pt: 'Termine esta etapa, ou siga para a próxima.',
+    en: 'Finish this step, or move on to the next one.',
+  },
   'path.backToPath': { pt: 'Voltar à trilha', en: 'Back to the path' },
   'path.empty': {
     pt: 'Nenhuma trilha ainda. Explore a biblioteca enquanto isso.',

@@ -104,9 +104,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const mobileNav = NAV.filter((item) => item.primary);
 
-  // Practice mode is immersive: the session renders its own minimal chrome
-  // (progress and a way out) and nothing else competes with the activity.
-  const immersive = location.pathname.startsWith('/practice/session');
+  // Practice mode and a running path are immersive: they render their own
+  // minimal chrome (progress and a way out) and nothing else competes with the
+  // activity — least of all a tab bar back to the list just left behind.
+  const immersive =
+    location.pathname.startsWith('/practice/session') ||
+    /^\/learn\/[^/]+\/step\//.test(location.pathname);
   // Everything the transport strip cannot hold. Without this, flashcards, the
   // mock interview and the profile were unreachable on a phone.
   const overflowNav = [...NAV.filter((item) => !item.primary), ...SECONDARY, ...TOOLS];

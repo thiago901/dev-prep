@@ -45,6 +45,9 @@ const AuthPage = lazy(() =>
 const LearnPage = lazy(() =>
   import('@/features/learn/LearnPage').then((module) => ({ default: module.LearnPage })),
 );
+const PathRunPage = lazy(() =>
+  import('@/features/learn/PathRunPage').then((module) => ({ default: module.PathRunPage })),
+);
 const PathPage = lazy(() =>
   import('@/features/learn/PathPage').then((module) => ({ default: module.PathPage })),
 );
@@ -74,6 +77,7 @@ export function AppRoutes() {
             <Route path="/" element={<HomePage />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/learn/:slug" element={<PathPage />} />
+            <Route path="/learn/:slug/step/:step" element={<PathRunPage />} />
             <Route path="/speaking" element={<SpeakingPage />} />
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/practice/session" element={<PracticeSessionPage />} />

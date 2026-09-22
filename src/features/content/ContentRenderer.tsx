@@ -559,7 +559,7 @@ function LearnFooter({
       <PanelRule />
       <div className="flex flex-wrap gap-2 bg-felt px-4 py-3">
         <TransportButton
-          variant={gradedAs === 'known' ? 'neutral' : 'primary'}
+          variant={gradedAs ? 'neutral' : 'primary'}
           size="lg"
           onClick={() => void onGrade('known')}
           aria-pressed={gradedAs === 'known'}

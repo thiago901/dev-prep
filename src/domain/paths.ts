@@ -4,9 +4,14 @@ import { activityKindDef, activityKindOf } from './activity';
 /**
  * Where you are inside a path.
  *
- * A step counts as done once it has been answered at least once — not once it
- * has been opened, and not once it has been "mastered". Paths teach; the
- * review schedule is what decides whether something stuck.
+ * A step counts as done once it has been worked through — answered, or read
+ * and acknowledged. Not once it has been opened, and not once it has been
+ * "mastered". Paths teach; the review schedule is what decides whether
+ * something stuck.
+ *
+ * The distinction matters because a learn step records no attempt: nothing was
+ * asked, so there is nothing to attempt. Counting only attempts left every
+ * reading step permanently pending, which stalled the whole path on step one.
  */
 
 export interface PathStep {
@@ -30,6 +35,17 @@ export interface PathProgress {
   complete: boolean;
 }
 
+/**
+ * Has this step been worked through?
+ *
+ * `revealedCount` is the one counter every activity moves: answering bumps it,
+ * and so does a learn card's "got it". Attempts alone miss reading steps.
+ */
+export function stepDone(progress: ContentProgress | undefined): boolean {
+  if (!progress) return false;
+  return progress.attempts > 0 || progress.revealedCount > 0;
+}
+
 export function pathProgress(
   path: LearningPath,
   contentById: Map<string, Content>,
@@ -41,7 +57,7 @@ export function pathProgress(
   for (const stepId of path.stepIds) {
     const content = contentById.get(stepId);
     if (!content) continue;
-    const done = (progressById[stepId]?.attempts ?? 0) > 0;
+    const done = stepDone(progressById[stepId]);
     const current = !done && !seenCurrent;
     if (current) seenCurrent = true;
     steps.push({ content, done, current });

@@ -63,6 +63,20 @@ sobre `localStorage` até defender a escolha numa conversa com um senior. As
 etapas continuam sendo conteúdos comuns — o treino diário reaproveita todas
 sem nenhuma autoria duplicada.
 
+Uma trilha é percorrida, não consultada. `/learn/:slug` é o roteiro;
+`/learn/:slug/step/:n` é a caminhada, no mesmo modo imersivo do treino diário:
+onde você está, uma saída, a etapa anterior e a próxima. A etapa mora na URL,
+então voltar no navegador é voltar uma etapa e recarregar não perde o lugar. O
+botão de avançar nunca fica desabilitado — uma etapa que você não consegue
+terminar também não pode prender você — mas só acende quando a etapa foi
+realmente feita. Sair salva: `Continuar` volta para a primeira etapa pendente,
+nunca para a primeira etapa.
+
+Uma etapa conta como feita quando foi trabalhada: respondida, ou lida e
+marcada como entendida. Só contar tentativas deixava toda etapa de leitura
+pendente para sempre, porque um card de conceito não pede resposta — e a
+trilha inteira travava na etapa um.
+
 ## Today's Practice
 
 O centro do app é uma sessão curta e finita — 5, 10 ou 20 atividades — que responde "o que eu deveria praticar agora?". Abrir, apertar Começar, praticar, terminar.

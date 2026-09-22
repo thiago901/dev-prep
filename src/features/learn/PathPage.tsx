@@ -68,7 +68,9 @@ export function PathPage() {
         <p className="legend-type" data-tabular>
           {[
             t('path.steps', { count: progress.total }),
-            progress.complete ? t('path.done') : t('path.remaining', { count: progress.minutesLeft }),
+            progress.complete
+              ? t('path.done')
+              : t('path.remaining', { count: progress.minutesLeft }),
           ].join(' · ')}
         </p>
       </div>
@@ -79,12 +81,13 @@ export function PathPage() {
         position={progress.position - 1}
       />
 
-      {/* The way in comes before the list of what is inside. */}
+      {/* The way in comes before the list of what is inside. It opens the
+          path at the step the user stopped on, never back at step one. */}
       {!progress.complete ? (
         <TransportButton
           variant="primary"
           size="lg"
-          onClick={() => progress.next && navigate(`/content/${progress.next.slug}`)}
+          onClick={() => navigate(`/learn/${path.slug}/step/${progress.position}`)}
         >
           {progress.started ? t('action.continue') : t('path.start')}
         </TransportButton>
@@ -107,7 +110,7 @@ export function PathPage() {
             return (
               <li key={step.content.id}>
                 <Link
-                  to={`/content/${step.content.slug}`}
+                  to={`/learn/${path.slug}/step/${position + 1}`}
                   className={cn(
                     'group flex items-start gap-3.5 border-t border-rule/60 px-4 py-4 transition-colors duration-150 first:border-t-0 hover:bg-plate',
                     step.current && 'bg-felt',
@@ -158,9 +161,14 @@ export function PathPage() {
         <Panel className="px-4 py-4">
           <p className="text-body-lg font-medium text-legend">{t('path.done')}</p>
           <p className="mt-1.5 max-w-read text-body text-legend-3">{t('path.doneBody')}</p>
-          <TransportButton className="mt-4" variant="neutral" onClick={() => navigate('/learn')}>
-            {t('nav.learn')}
-          </TransportButton>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <TransportButton variant="neutral" onClick={() => navigate('/learn')}>
+              {t('nav.learn')}
+            </TransportButton>
+            <TransportButton variant="quiet" onClick={() => navigate(`/learn/${path.slug}/step/1`)}>
+              {t('path.restart')}
+            </TransportButton>
+          </div>
         </Panel>
       ) : null}
     </div>

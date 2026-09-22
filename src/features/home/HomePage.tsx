@@ -230,9 +230,9 @@ export function HomePage() {
           icon={lit === 'path' ? undefined : <LuArrowRight />}
           onClick={() =>
             navigate(
-              featuredPath.next
-                ? `/content/${featuredPath.next.slug}`
-                : `/learn/${featuredPath.path.slug}`,
+              `/learn/${featuredPath.path.slug}/step/${
+                featuredPath.complete ? 1 : featuredPath.position
+              }`,
             )
           }
         >
